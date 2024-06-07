@@ -1,6 +1,6 @@
 # Session.js
 
-Session.js (`session-oxen`) is a JavaScript library to use [Session messenger by OXEN](https://getsession.org) programmatically. Can be used entirely on server or in browser with server proxy. Includes TypeScript definitions.
+Session.js (`session-oxen`) is a JavaScript library to use [Session messenger by OXEN](https://getsession.org) programmatically. Can be used entirely on server or in browser with server proxy. Includes TypeScript definitions. Tests with bun:test.
 
 Written with blazingly fast [Bun](bun.sh), a modern runtime for JavaScript and alternative to Node.js. **This package cannot be used with Node.js, it uses a better runtime instead of it**
 
@@ -72,11 +72,19 @@ By using this software, you are agreeing to abide by [Terms of use](./TERMS.md).
 
 ## How to use
 
+Make sure to await for initialization of libsodium:
+```ts
+import { ready } from 'session-oxen/sodium'
+await ready
+// ...
+```
+Otherwise you might get errors like `sodium.crypto_sign_seed_keypair is not a function`
+
 TBD
 
 ## Storage
 
-You can use any of existing storage adapters or write your own, that implements Storage interface from `session-oxen/storage`
+You can use any of existing storage adapters or write your own
 
 <table>
 <tr>
@@ -84,7 +92,7 @@ You can use any of existing storage adapters or write your own, that implements 
 </tr>
 <tr>
 <td>In-memory</td>
-<td>Default storage that stores data in memory, that is reset after this process exits or tab is closed. Ideal for short living one-time bots or testing</td>
+<td>Default storage that stores data in memory, that is reset after this process exits or tab is closed. Ideal for short living one-time bots or testing. It is not persistant.</td>
 <td>
 
 Simply **do not provide any storage to `storage` option in Session class constructor** and this will be the default. You can optionally provide it as: 
@@ -97,3 +105,78 @@ new Session({ storage: InMemoryStorage })
 
 </td>
 <td>
+
+To implement your own storage, write class that implements Storage interface from `session-oxen/storage`. Take a look at this example with in-memory storage
+
+```ts
+import type { Storage } from 'session-oxen/storage'
+
+export class MyInMemoryStorage implements Storage {
+  storage: Map<string, string> = new Map()
+
+  get(key: string) {
+    return this.storage.get(key) ?? null
+  }
+
+  set(key: string, value: string) {
+    this.storage.set(key, value)
+  }
+
+  delete(key: string) {
+    this.storage.delete(key)
+  }
+
+  has(key: string) {
+    return this.storage.has(key)
+  }
+}
+```
+
+## Error handling
+
+Session.js validates and handles a lot of errors for you, wrapping them in special different classes, so you can easily handle them on your abstract level. For example:
+
+```ts
+import { SessionValidationError, SessionValidationErrorCode } from 'session-oxen/errors'
+
+const session = new Session()
+
+try {
+  session.setMnemonic('invalid mnemonic') // <- throws SessionValidationError, which extends from generic Error class
+} catch(e) {
+  if(e instanceof SessionValidationError) {
+    if(e.code === SessionValidationErrorCode.InvalidMnemonic) {
+      console.error('You entered invalid mnemonic!') // <- `e` will have code property with one of SessionValidationErrorCode enums
+    } else {
+      throw e
+    }
+  } else {
+    throw e
+  }
+}
+```
+
+## Collection of useful utils
+
+### Mnemonic decoding and encoding
+
+Use `session-oxen/mnemonic`:
+
+```ts
+import { encode, decode, MnemonicWordset } from 'session-oxen/mnemonic'
+
+const seed = decode('love love love love love love love love love love love love')
+const mnemonic = encode(seed)
+```
+
+You can even add your own mnemonic languages:
+
+```ts
+import { decode, mnemonicLanguages, addMnemonicLanguage } from 'session-oxen/mnemonic'
+
+mnemonicLanguages.russian = addMnemonicLanguage({
+  prefixLen: 3,
+  words: [/* ... */]
+})
+decode('love love love love love love love love love love love love', 'russian')
+```
