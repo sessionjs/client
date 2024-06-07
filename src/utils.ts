@@ -1,4 +1,4 @@
-// Credit: https://stackoverflow.com/a/69585881
+// 👇 Credit: https://stackoverflow.com/a/69585881 👇
 
 const HEX_STRINGS = '0123456789abcdef'
 const MAP_HEX: { [k: string]: number } = {
@@ -26,4 +26,30 @@ export function hexToUint8Array(hexString: string) {
     bytes[i] = (a << 4) | b
   }
   return i === bytes.length ? bytes : bytes.slice(0, i)
+}
+
+// 👆 Credit: https://stackoverflow.com/a/69585881 👆
+
+export const concatUInt8Array = (...args: Array<Uint8Array>): Uint8Array => {
+  const totalLength = args.reduce((acc, current) => acc + current.length, 0)
+
+  const concatted = new Uint8Array(totalLength)
+  let currentIndex = 0
+  args.forEach(arr => {
+    concatted.set(arr, currentIndex)
+    currentIndex += arr.length
+  })
+
+  return concatted
+}
+
+export const removePrefixIfNeeded = (sessionID: string): string => {
+  if (sessionID.startsWith('05')) {
+    return sessionID.slice(2)
+  }
+  return sessionID
+}
+
+export const isHex = (str: string): boolean => {
+  return /^([0-9a-f]{2})+$/i.test(str)
 }

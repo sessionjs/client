@@ -1,5 +1,5 @@
 import sodium from 'libsodium-wrappers-sumo'
-import { hexToUint8Array } from '../utils'
+import { Uint8ArrayToHex, hexToUint8Array } from '../utils'
 
 export type Keypair = {
   x25519: sodium.KeyPair
@@ -28,4 +28,9 @@ export function getKeypairFromSeed(seedHex: string): Keypair {
   }
 
   return { x25519: x25519KeyPair, ed25519: ed25519KeyPair }
+}
+
+export function generateSeedHex() {
+  const seed = sodium.randombytes_buf(16)
+  return Uint8ArrayToHex(seed)
 }

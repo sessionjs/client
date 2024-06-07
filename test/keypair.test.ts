@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 import { decode } from '../src/mnemonic'
-import { getKeypairFromSeed } from '../src/keypairs'
+import { getKeypairFromSeed } from '../src/keypair'
 import { Uint8ArrayToHex } from '../src/utils'
 import { ready } from '../src/sodium'
 await ready

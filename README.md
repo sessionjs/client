@@ -104,7 +104,8 @@ new Session({ storage: InMemoryStorage })
 ```
 
 </td>
-<td>
+</tr>
+</table>
 
 To implement your own storage, write class that implements Storage interface from `session-oxen/storage`. Take a look at this example with in-memory storage
 
@@ -180,3 +181,19 @@ mnemonicLanguages.russian = addMnemonicLanguage({
 })
 decode('love love love love love love love love love love love love', 'russian')
 ```
+
+In order to generate random mnemonic:
+
+1. Use `generateSeedHex`
+2. Use `encode` to encode seed to mnemonic
+
+```ts
+import { encode } from 'session-oxen/mnemonic'
+import { generateSeedHex } from 'session-oxen/keypair'
+
+const mnemonic = encode(generateSeedHex())
+```
+
+### Session client constants
+
+You can use some Session client constatnts from `session-oxen/consts` such as `CONVERSATION.MAX_VOICE_MESSAGE_DURATION` which should help you define limits for your client
