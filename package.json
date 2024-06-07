@@ -1,0 +1,17 @@
+{
+  "name": "session-oxen",
+  "version": "0.0.1",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "eslint": "^9.4.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "src/**/*",
+    "README.md"
+  ]
+}
