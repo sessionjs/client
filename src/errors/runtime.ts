@@ -1,5 +1,7 @@
 export enum SessionRuntimeErrorCode {
   EmptyUser = 'empty_user',
+  Generic = 'generic',
+  NoSwarmsAvailable = 'no_swarms_available',
 }
 
 /** Generic error for cases where developer does something incorrectly */

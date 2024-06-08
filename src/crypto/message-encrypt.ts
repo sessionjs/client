@@ -99,7 +99,7 @@ type EncryptAndWrapMessage = {
   namespace: number | null;
 } & SharedEncryptAndWrap;
 
-type EncryptAndWrapMessageResults = {
+export type EncryptAndWrapMessageResults = {
   data64: string;
   networkTimestamp: number;
   data: Uint8Array;

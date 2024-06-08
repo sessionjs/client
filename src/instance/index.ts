@@ -6,14 +6,19 @@ import { decode } from '../mnemonic'
 import { getKeypairFromSeed, type Keypair } from '../keypair'
 import { Uint8ArrayToHex, isHex } from '../utils'
 import { SessionRuntimeError, SessionRuntimeErrorCode } from '../errors/runtime'
-import { wrap } from '../crypto/message-encrypt'
+import { wrap, type EncryptAndWrapMessageResults } from '../crypto/message-encrypt'
 import { VisibleMessage } from '@/messages/messages/visible-message'
 import { v4 as uuid } from 'uuid'
-import { toRawMessage } from '@/messages'
+import { toRawMessage, type RawMessage } from '@/messages'
 import { SnodeNamespaces } from '@/types/namespaces'
-import { RequestType } from '@/network/request'
+import { RequestType, type RequestGetSwarmsBody, type RequestStoreBody } from '@/network/request'
 import { BunNetwork } from '@/network/bun'
-import type { ResponseStore } from '@/network/response'
+import type { ResponseGetSnodes, ResponseGetSwarms, ResponseStore } from '@/network/response'
+import type { Snode } from '@/types/snode'
+import _ from 'lodash'
+import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
+import pRetry from 'p-retry'
+import type { Swarm } from '@/types/swarm'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
 
@@ -24,17 +29,21 @@ export class Session {
   private displayName: string | undefined
   private network: Network
   private storage: Storage
+  private snodes: Snode[] | undefined
+  private ourSwarms: Swarm[] | undefined
+  private ourSwarm: Swarm | undefined
 
-  constructor(options: {
+  constructor(options?: {
     storage: Storage
     network: Network
   }) {
-    if (options.storage) {
-      checkStorage(options.storage)
+    if (options?.storage) {
+      checkStorage(options?.storage)
     }
     // todo: same with network
-    this.network = options.network ?? new BunNetwork()
-    this.storage = options.storage ?? new InMemoryStorage()
+
+    this.network = options?.network ?? new BunNetwork()
+    this.storage = options?.storage ?? new InMemoryStorage()
   }
 
   /** Sets mnemonic for this instance, parses it to keypair. Throws SessionValidationError if mnemonic is invalid */
@@ -72,7 +81,7 @@ export class Session {
   }
 
   /** Get cached display name of this instance. Note that it doesn't fetch display name from network, since display name comes in configuration message, so this method might return undefined */
-  public getDisplayName(name: string): string | undefined {
+  public getDisplayName(): string | undefined {
     return this.displayName
   }
 
@@ -80,12 +89,12 @@ export class Session {
    * Sends message to other Session ID
    * Might throw SessionFetchError if there is a connection issue
    * @param to — Session ID of the recipient
-   * @returns `Promise<boolean>` — whether the message was sent successfully
+   * @returns `Promise<{ messageHash: string, syncMessageHash: string }>` — hashes (identifiers) of the messages sent (visible and sync message_
    */
   public async sendMessage({ to, text }: {
     to: string,
     text?: string,
-  }): Promise<boolean> {
+  }): Promise<{ messageHash: string, syncMessageHash: string }> {
     if(!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
     if(to.length !== 66) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidSessionID, message: 'Invalid session ID length' })
     if (!to.startsWith('05') || !isHex(to)) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidSessionID, message: 'Session ID must be a hex string starting from 05' })
@@ -143,36 +152,109 @@ export class Session {
       }
     ], { networkTimestamp: timestamp })
 
-    const { messageHash, syncMessageHash } = await this.request({
-      type: RequestType.Store,
-      body: {
-        params: {
-          pubkey: rawMessage.recipient,
-          data64: messageEncrypted.data64,
-          ttl: messageEncrypted.ttl,
-          timestamp: messageEncrypted.networkTimestamp,
-          namespace: messageEncrypted.namespace,
-        },
-        snode: await getTargetNode(),
-        sync: {
-          pubkey: this.sessionID,
-          data: syncMessageEncrypted.data64
+    const send = async ({ message, data }: { message: RawMessage, data: EncryptAndWrapMessageResults }) => {
+      const messageToSelf = message.recipient === this.sessionID
+      let swarms = messageToSelf
+        ? [await this.getOurSwarm()]
+        : await this.getSwarmsFor(message.recipient)
+      return await pRetry(async () => {
+        let swarm
+        if (messageToSelf) {
+          if (swarms.length) {
+            swarm = _.sample(swarms)
+          } else {
+            swarm = _.sample(this.ourSwarms)
+            this.ourSwarm = swarm
+          }
+        } else {
+          swarm = _.sample(swarms)
         }
-      }
-    }) as ResponseStore
+        if (!swarm) throw new SessionFetchError({ code: SessionFetchErrorCode.NoSwarmsAvailable, message: 'No swarms available' })
+        try {
+          const { hash } = await this.request<ResponseStore, RequestStoreBody>({
+            type: RequestType.Store,
+            body: {
+              swarm: swarm,
+              destination: message.recipient,
+              data64: data.data64,
+              ttl: data.ttl,
+              timestamp: data.networkTimestamp,
+              namespace: data.namespace,
+            }
+          })
+          return hash
+        } catch (e) {
+          if (e instanceof SessionFetchError && e.code === SessionFetchErrorCode.RetryWithOtherNode421Error) {
+            swarms = swarms.filter(s => s !== swarm)
+            this.ourSwarms = this.ourSwarms!.filter(s => s !== swarm)
+          }
+          throw e
+        }
+      }, {
+        retries: 5,
+        shouldRetry: e => e instanceof SessionFetchError && e.code === SessionFetchErrorCode.RetryWithOtherNode421Error
+      })
+    }
+    
+    const messageHash = await send({ message: rawMessage, data: messageEncrypted })
+    const syncMessageHash = await send({ message: rawSyncMessage, data: syncMessageEncrypted })
 
-    return true
+    return { messageHash, syncMessageHash }
   }
 
   getNowWithNetworkOffset() {
     return Date.now() // todo: replace with network timestamp
   }
 
-  async request({ type, body }: {
+  async request<Response, Body = any>({ type, body }: {
     type: RequestType,
-    body: any
-  }) {
-    // todo
-    return await this.network.onRequest(type, body)
+    body: Body
+  }): Promise<Response> {
+    return await this.network.onRequest(type, body) as Response
+  }
+
+  async getSwarmsFor(sessionID: string) {
+    const snodes = await this.getSnodes()
+    return await pRetry(async () => {
+      const snode = _.sample(snodes)
+      if (!snode) throw new SessionFetchError({ code: SessionFetchErrorCode.NoSnodesAvailable, message: 'No snodes available' })
+      try {
+        const { swarms } = await this.request<ResponseGetSwarms, RequestGetSwarmsBody>({ type: RequestType.GetSwarms, body: { snode, pubkey: sessionID } })
+        if(swarms.length === 0) {
+          throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.NoSwarmsAvailable, message: 'No swarms found for ' + sessionID })
+        }
+        return swarms
+      } catch(e) {
+        if (e instanceof SessionFetchError && e.code === SessionFetchErrorCode.RetryWithOtherNode421Error) {
+          this.snodes = this.snodes!.filter(s => s !== snode)
+        }
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to fetch swarms from', snode?.public_ip, e)
+        }
+        throw e
+      }
+    }, {
+      retries: 5,
+      shouldRetry: e => e instanceof SessionFetchError && e.code === SessionFetchErrorCode.RetryWithOtherNode421Error
+    })
+  }
+
+  async getOurSwarm() {
+    if (!this.sessionID) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
+    if (this.ourSwarm) {
+      return this.ourSwarm
+    }
+    this.ourSwarms = await this.getSwarmsFor(this.sessionID)
+    this.ourSwarm = _.sample(this.ourSwarms)
+    if(!this.ourSwarm) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.NoSwarmsAvailable, message: 'No swarms found for this instance' })
+    return this.ourSwarm
+  }
+
+  async getSnodes() {
+    if(!this.snodes) {
+      const { snodes } = await this.request<ResponseGetSnodes>({ type: RequestType.GetSnodes, body: {} })
+      this.snodes = snodes
+    }
+    return this.snodes
   }
 }

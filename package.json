@@ -34,6 +34,7 @@
     "crc": "^4.3.2",
     "libsodium-wrappers-sumo": "^0.7.13",
     "lodash": "^4.17.21",
+    "p-retry": "^6.2.0",
     "uuid": "^9.0.1"
   },
   "trustedDependencies": [
