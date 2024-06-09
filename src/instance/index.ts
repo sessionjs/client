@@ -1,4 +1,4 @@
-import { InMemoryStorage, type Storage } from '@/storage'
+import { InMemoryStorage, StorageKeys, type Storage } from '@/storage'
 import type { Network } from '@/network'
 import { checkStorage } from '../storage/utils'
 import { SessionValidationError, SessionValidationErrorCode } from '../errors/validation'
@@ -9,7 +9,7 @@ import { SessionRuntimeError, SessionRuntimeErrorCode } from '../errors/runtime'
 import { wrap, type EncryptAndWrapMessageResults } from '../crypto/message-encrypt'
 import { VisibleMessage } from '@/messages/messages/visible-message'
 import { v4 as uuid } from 'uuid'
-import { toRawMessage, type RawMessage } from '@/messages'
+import { toRawMessage, type RawMessage } from '@/messages/signal-message'
 import { SnodeNamespaces } from '@/types/namespaces'
 import { RequestType, type RequestGetSwarmsBody, type RequestStoreBody } from '@/network/request'
 import { BunNetwork } from '@/network/bun'
@@ -21,6 +21,7 @@ import pRetry from 'p-retry'
 import type { Swarm } from '@/types/swarm'
 import { Poller } from '@/polling'
 import type { EventCallback, EventName } from '@/instance/events'
+import { signalMessageToMessage } from '@/messages'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
 
@@ -274,11 +275,15 @@ export class Session {
     this.pollers.add(poller)
     poller._attachedToInstance(this, {
       onMessagesReceived: (messages) => {
-        this.events.get('messagesReceived')?.forEach(cb => cb(messages))
+        const dataMessages = messages.filter(m => m.content.dataMessage)
+        this.events.get('message')?.forEach(cb => {
+          dataMessages.forEach(m => cb(signalMessageToMessage(m)))
+        })
       },
       updateLastHashes: (hashes) => {
-        // console.log(hashes)
-      }
+        this.storage.set(StorageKeys.LastHashes, JSON.stringify(hashes))
+      },
+      storage: this.storage
     })
   }
 
@@ -286,7 +291,7 @@ export class Session {
     return this.keypair
   }
 
-  events: Map<EventName, EventCallback<any>[]> = new Map()
+  events: Map<EventName, EventCallback<EventName>[]> = new Map()
   on<E extends EventName>(eventName: E, callback: EventCallback<E>) {
     this.addEventListener(eventName, callback)
   }

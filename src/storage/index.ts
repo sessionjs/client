@@ -6,3 +6,7 @@ export interface Storage {
   delete(key: string): void | Promise<void>
   has(key: string): boolean | Promise<boolean>
 }
+
+export enum StorageKeys {
+  LastHashes = 'last_hashes',
+}

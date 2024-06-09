@@ -4,7 +4,7 @@
 import { SignalService } from '@/signal-service'
 import { DURATION, TTL_DEFAULT } from '@/consts'
 import type { DisappearingMessageType } from '@/types/disappearing-message'
-import { ContentMessage, type MessageParams } from './index'
+import { ContentMessage, type MessageParams } from './signal-message'
 
 export interface ExpirableMessageParams extends MessageParams {
   expirationType: DisappearingMessageType | null;

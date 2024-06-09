@@ -24,9 +24,9 @@ Use cases:
     - [ ] Manual snode/swarm control
     - [X] Data retrieving from swarms
     - [X] Messages polling
-    - [ ] Messages types
-      - [ ] Regular chat message
-        - [ ] Text
+    - [X] Messages types
+      - [X] Regular chat message
+        - [X] Text
         - [ ] Attachments
           - [ ] Images
           - [ ] Files
@@ -58,7 +58,7 @@ Use cases:
   - [X] Profile editing
     - [X] Display name
     - [ ] Avatar
-    - [ ] Some sort of save to the network?
+    - [ ] Some sort of profile save request to the network?
   - [ ] ONS resolving
 
 </details>
@@ -91,11 +91,15 @@ const { messageHash, syncMessageHash } = await session.sendMessage({
 console.log('Sent message with id', hash)
 ```
 
-### Polling messages automatically
+### Polling messages
+
+By default, if you don't provide `interval` in options to Poller class constructor, it will poll new messages each 3 seconds.
+
 ```ts
 import { Session } from 'session-oxen'
 import { Poller } from 'session-oxen/polling'
 import { SnodeNamespaces } from 'session-oxen/types'
+import { Message } from 'session-oxen/messages'
 import { ready } from 'session-oxen/sodium'
 await ready
 
@@ -104,11 +108,19 @@ const mnemonic = 'love love love love love love love love love love love love lo
 const session = new Session()
 session.setMnemonic(mnemonic, 'Display name')
 
-const poller = new Poller()
+const poller = new Poller() // polls every 3 seconds
 session.addPoller(poller)
 
-session.on('message', (msg) => {
-  console.log('Received new message', msg)
+session.on('message', (msg: Message) => {
+  console.log('Received new message!', 
+    'From:', msg.from,
+    'Is from closed group:', msg.type === 'group',
+    'Group id:', msg.type === 'group' ? msg.groupId : 'Not group',
+    'Text:', msg.text ?? 'No text',
+  )
+  // If you want to access more properties and experiment with them, use _envelope and _content
+  // msg._content = SignalService.Content <- useful message payload
+  // msg._envelope = EnvelopePlus <- message metadata
 })
 ```
 
@@ -139,13 +151,37 @@ const messages = await closedGroupsMessagesPoller.poll()
 console.log('Received closed group messages', messages)
 ```
 
-Make sure to await for initialization of libsodium:
+You can use methods `startPolling`, `stopPolling` and `setInterval` on Poller instance to control it. Read more in JSDoc hints in your code editor or IDE.
+
+### Events
+
+You can listen to a variety of events to trigger parts of your application that are responsible to react on them.
+
+```ts
+// ... //
+const session = new Session()
+const onMessage = msg => { /* your function */ }
+session.on('message', onMessage)
+// alias: session.addEventListener('message', onMessage)
+
+session.off('message', onMessage)
+// alias: session.removeEventListener('message', onMessage)
+```
+
+| Event name | Description                                                                                                                                                                                                                                                                                      | Conditions                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| `message`  | New message received in DM or closed group. For advanced users: this is only emitted for DataMessage i.e. VisibleMessage i.e. message that was sent by user to the chat. This does not include service messages and other events sent by Session clients. Look at this like on a message bubble. | Polling is enabled or triggered manually by poll() call via `Poller` constructor |
+|            |                                                                                                                                                                                                                                                                                                  |                                                                                  |
+
+Always make sure to await for initialization of libsodium:
 ```ts
 import { ready } from 'session-oxen/sodium'
 await ready
 // ...
 ```
 Otherwise you might get errors like `sodium.crypto_sign_seed_keypair is not a function`
+
+More examples are in [./examples directory](./examples/)
 
 ## Storage
 

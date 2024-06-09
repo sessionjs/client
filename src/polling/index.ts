@@ -6,6 +6,8 @@ import type { Keypair } from '@/keypair'
 import { RequestType, type RequestPollBody } from '@/network/request'
 import type { ResponsePoll } from '@/network/response'
 import { SignalService } from '@/signal-service'
+import { StorageKeys, type Storage } from '@/storage'
+import type { EnvelopePlus } from '@/types/envelope'
 import { SnodeNamespace, SnodeNamespaces } from '@/types/namespaces'
 import type { RequestNamespace } from '@/types/snode-retrieve'
 import _ from 'lodash'
@@ -15,8 +17,9 @@ import { z } from 'zod'
 const allNamespaces = new Set([SnodeNamespaces.UserMessages, SnodeNamespaces.ConvoInfoVolatile, SnodeNamespaces.UserContacts, SnodeNamespaces.UserGroups, SnodeNamespaces.UserProfile])
 
 type InstanceMethodsForPoller = {
-  onMessagesReceived: (messages: SignalService.Content[]) => void
+  onMessagesReceived: (messages: { hash: string, envelope: EnvelopePlus, content: SignalService.Content }[]) => void
   updateLastHashes: (hashes: { namespace: SnodeNamespaces, lastHash: string }[]) => void
+  storage: Storage
 }
 
 export class Poller {
@@ -29,15 +32,15 @@ export class Poller {
 
   /**
    * New poller of messages for Session instance. Starts polling as soon as attached to instance of interval is not null, call stopPolling to stop automatic polling and startPolling to resume.
-   * @param interval — Polling interval in milliseconds, must either be integer > 0. Set to null to disable automatic polling
+   * @param interval — Polling interval in milliseconds, must either be integer > 0. Set to null to disable automatic polling. Default is 3000ms.
    */
   constructor(options?: {
     interval?: number | null
     namespaces?: Set<SnodeNamespaces>
   }) {
     const { interval } = z.object({
-      interval: z.number().int().positive().default(10000).or(z.literal(null))
-    }).parse(options)
+      interval: z.number().int().positive().default(3000).or(z.literal(null))
+    }).parse(options ?? {})
     this.interval = interval
     this.namespaces = options?.namespaces ?? allNamespaces
   }
@@ -56,11 +59,12 @@ export class Poller {
 
   /** Manually resumes auto-polling. Does nothing if `interval` of Poller is null */
   startPolling() {
+    if(this.interval === null) return
     if(!this.instance) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.NoInstancePolling, message: 'Polling can\'t be started without attaching Session instance' })
     if(!this.instance.isAuthorized) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Polling can\'t be started without user' })
     if (this.polling === false) {
       this.polling = true
-      this.intervalId = setInterval(() => this.poll())
+      this.intervalId = setInterval(() => this.poll(), this.interval)
     }
   }
 
@@ -68,8 +72,18 @@ export class Poller {
   stopPolling() {
     if(this.polling === true) {
       this.polling = false
-      clearInterval(this.intervalId)
+      if (this.intervalId !== undefined) {
+        clearInterval(this.intervalId)
+      }
       this.intervalId = undefined
+    }
+  }
+
+  setInterval(interval: number | null) {
+    this.stopPolling()
+    this.interval = interval
+    if (interval !== null && this.instance && this.instance.isAuthorized) {
+      this.startPolling()
     }
   }
 
@@ -78,10 +92,20 @@ export class Poller {
     return this.polling
   }
 
+  private async getLastHashes() {
+    const methods = this.methods
+    if (!methods) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.NoInstancePolling, message: 'Polling can\'t be started without attaching Session instance' })
+    const lastHashesStorage = await methods.storage.get(StorageKeys.LastHashes)
+    if (lastHashesStorage === null) return []
+    return JSON.parse(lastHashesStorage) as { namespace: SnodeNamespaces, lastHash: string }[]
+  }
+
   /** Trigger manual messages polling */
   async poll() {
     if (!this.instance) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.NoInstancePolling, message: 'Polling can\'t be started without attaching Session instance' })
     // const instance = this.instance
+    const methods = this.methods
+    if (!methods) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.NoInstancePolling, message: 'Polling can\'t be started without attaching Session instance' })
     const keypair = this.instance.getKeypair()
     if(!keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.Generic, message: 'Polling can\'t be started without keypair' })
 
@@ -89,6 +113,8 @@ export class Poller {
 
     const sessionID = this.instance.getSessionID()
     const ourSwarm = await this.instance.getOurSwarm()
+
+    const lastHashes = await this.getLastHashes()
     
     const { messages } = await this.instance.request<ResponsePoll, RequestPollBody>({
       type: RequestType.Poll,
@@ -103,7 +129,7 @@ export class Poller {
             method: 'retrieve',
             namespace: namespace
           }),
-          lastHash: undefined
+          lastHash: lastHashes.find(h => h.namespace === namespace)?.lastHash
         })),
       }
     })
@@ -131,7 +157,7 @@ export class Poller {
     // TODO: groups are polled separately
     const groupPubKey = null
 
-    const lastHashes = messages
+    const newLastHashes = messages
       .filter(m => m.messages.length > 0)
       .map(m => ({
         namespace: m.namespace,
@@ -162,16 +188,20 @@ export class Poller {
 
         try {
           const decrypted = decryptMessage(keypairs, envelope)
-          return SignalService.Content.decode(new Uint8Array(decrypted))
+          return {
+            hash: m.hash,
+            envelope,
+            content: SignalService.Content.decode(new Uint8Array(decrypted))
+          }
         } catch(e) {
           if(process.env.NODE_ENV === 'development') console.error(e)
           return
         }
       })
-      .filter(m => m !== undefined) as SignalService.Content[]
+      .filter(m => m !== undefined) as { hash: string, envelope: EnvelopePlus, content: SignalService.Content }[]
 
 
-    updateLastHashes(lastHashes)
+    updateLastHashes(newLastHashes)
     onMessagesReceived(dataMessagesDecrypted)
 
     return dataMessagesDecrypted

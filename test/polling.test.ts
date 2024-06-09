@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test'
 import { Session } from '../src'
 import { Poller } from '../src/polling'
 import { ready } from '../src/sodium'
-import type { SignalService } from '@/signal-service'
+import type { Message } from '../src/messages'
 await ready
 
 test('polling messages', async () => {
@@ -14,10 +14,10 @@ test('polling messages', async () => {
   const poller = new Poller({ interval: null })
   session.addPoller(poller)
 
-  const [messages1, messages2] = await Promise.all([
+  const [messages1, message] = await Promise.all([
     poller.poll(),
-    new Promise<SignalService.Content[]>(resolve => session.on('messagesReceived', messages => resolve(messages)))
+    new Promise<Message>(resolve => session.on('message', message => resolve(message)))
   ])
   expect(messages1).toBeArray()
-  expect(messages2).toBeArray()
+  expect(message.id).toBeString()
 })
