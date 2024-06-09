@@ -45,11 +45,15 @@ export const concatUInt8Array = (...args: Array<Uint8Array>): Uint8Array => {
   return concatted
 }
 
-export const removePrefixIfNeeded = (sessionID: string): string => {
-  if (sessionID.startsWith('05')) {
-    return sessionID.slice(2)
+export function removePrefixIfNeeded(prependedPublicKey: Uint8Array): Uint8Array
+export function removePrefixIfNeeded(sessionID: string): string
+export function removePrefixIfNeeded(input: string | Uint8Array): string | Uint8Array {
+  if (typeof input === 'string' && input.startsWith('05')) {
+    return input.slice(2)
+  } else if(input instanceof Uint8Array && input[0] === 5) {
+    return input.slice(1)
   }
-  return sessionID
+  return input
 }
 
 export const isHex = (str: string): boolean => {
@@ -58,4 +62,8 @@ export const isHex = (str: string): boolean => {
 
 export function Uint8ArrayToBase64(uint8array: Uint8Array): string {
   return ByteBuffer.wrap(uint8array).toString('base64')
+}
+
+export function base64ToUint8Array(string: string): Uint8Array {
+  return new Uint8Array(ByteBuffer.wrap(string, 'base64').toArrayBuffer())
 }

@@ -14,7 +14,7 @@ export async function poll({ swarm, namespaces }: RequestPollBody): Promise<Resp
   if (namespaces.length === 0) {
     throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidNamespaces, message: `invalid number of retrieve namespace provided: ${namespaces.length}` })
   }
-  if (namespaces.some(ns => ns.namespace === 'all')) throw new Error('namespace "all" is not supported yet')
+  if (namespaces.some(ns => ns.namespace === 'all')) throw new SessionValidationError({ code: SessionValidationErrorCode.UnsupportedFeature, message: 'namespace "all" is not supported yet' })
   const results = await pollSnode({ swarm, namespaces })
   if (results === null) {
     throw new SessionFetchError({ code: SessionFetchErrorCode.InvalidResponse, message: 'Polling failed' })

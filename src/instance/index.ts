@@ -20,6 +20,7 @@ import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
 import pRetry from 'p-retry'
 import type { Swarm } from '@/types/swarm'
 import { Poller } from '@/polling'
+import type { EventCallback, EventName } from '@/instance/events'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
 
@@ -268,13 +269,37 @@ export class Session {
     
   }
 
-  async addPoller(poller: Poller) {
+  addPoller(poller: Poller) {
     if (!(poller instanceof Poller)) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidPoller, message: 'Poller must be an instance of Poller' })
     this.pollers.add(poller)
-    poller._attachedToInstance(this)
+    poller._attachedToInstance(this, {
+      onMessagesReceived: (messages) => {
+        this.events.get('messagesReceived')?.forEach(cb => cb(messages))
+      },
+      updateLastHashes: (hashes) => {
+        // console.log(hashes)
+      }
+    })
   }
 
-  async getKeypair() {
+  getKeypair() {
     return this.keypair
+  }
+
+  events: Map<EventName, EventCallback<any>[]> = new Map()
+  on<E extends EventName>(eventName: E, callback: EventCallback<E>) {
+    this.addEventListener(eventName, callback)
+  }
+
+  off<E extends EventName>(eventName: E, callback: EventCallback<E>) {
+    this.removeEventListener(eventName, callback)
+  }
+
+  addEventListener<E extends EventName>(eventName: E, callback: EventCallback<E>) {
+    this.events.set(eventName, [...(this.events.get(eventName) ?? []), callback])
+  }
+
+  removeEventListener<E extends EventName>(eventName: E, callback: EventCallback<E>) {
+    this.events.set(eventName, (this.events.get(eventName) ?? []).filter(cb => cb !== callback))
   }
 }

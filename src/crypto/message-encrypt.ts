@@ -6,6 +6,7 @@ import type { Keypair } from '../keypair'
 import { isNil, toNumber } from 'lodash'
 import { SnodeNamespaces } from '@/types/namespaces'
 import ByteBuffer from 'bytebuffer'
+import { SessionCryptoError, SessionCryptoErrorCode } from '@/errors/crypto'
 
 export type EncryptResult = {
   envelopeType: SignalService.Envelope.Type
@@ -21,7 +22,7 @@ export async function encrypt(
   const { CLOSED_GROUP_MESSAGE, SESSION_MESSAGE } = SignalService.Envelope.Type
 
   if (encryptionType !== CLOSED_GROUP_MESSAGE && encryptionType !== SESSION_MESSAGE) {
-    throw new Error(`Invalid encryption type:${encryptionType}`)
+    throw new SessionCryptoError({ code: SessionCryptoErrorCode.MessageEncryptionFailed, message: `Invalid encryption type:${encryptionType}` })
   }
 
   const encryptForClosedGroup = encryptionType === CLOSED_GROUP_MESSAGE
@@ -61,7 +62,7 @@ async function encryptUsingSessionProtocol(
     !userED25519KeyPairHex.publicKey?.length ||
     !userED25519KeyPairHex.privateKey?.length
   ) {
-    throw new Error('Couldn\'t find user ED25519 key pair.')
+    throw new SessionCryptoError({ code: SessionCryptoErrorCode.MessageEncryptionFailed, message: 'Couldn\'t find user ED25519 key pair.' })
   }
 
   const recipientX25519PublicKey = hexToUint8Array(removePrefixIfNeeded(recipient))
@@ -74,14 +75,14 @@ async function encryptUsingSessionProtocol(
 
   const signature = sodium.crypto_sign_detached(verificationData, userED25519KeyPairHex.privateKey)
   if (!signature || signature.length === 0) {
-    throw new Error('Couldn\'t sign message')
+    throw new SessionCryptoError({ code: SessionCryptoErrorCode.MessageEncryptionFailed, message: 'Couldn\'t sign message.' })
   }
 
   const plaintextWithMetadata = concatUInt8Array(plaintext, userED25519KeyPairHex.publicKey, signature)
 
   const ciphertext = sodium.crypto_box_seal(plaintextWithMetadata, recipientX25519PublicKey)
   if (!ciphertext) {
-    throw new Error('Couldn\'t encrypt message.')
+    throw new SessionCryptoError({ code: SessionCryptoErrorCode.MessageEncryptionFailed, message: 'Couldn\'t encrypt message.' })
   }
   return ciphertext
 }

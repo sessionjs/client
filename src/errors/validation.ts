@@ -6,6 +6,8 @@ export enum SessionValidationErrorCode {
   InvalidNamespaces = 'invalid_namespaces',
   NotOurPubkeyNotLegacyClosedGroup = 'not_our_pubkey_not_legacy_closed_group',
   NotZeroNamespaceNotLegacyClosedGroup = 'not_zero_namespace_not_legacy_closed_group',
+  UnsupportedFeature = 'unsupported_feature',
+  InvalidMessage = 'invalid_message',
 }
 
 /** Validation error, indicating that the developer provided invalid input */
