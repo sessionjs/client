@@ -1,3 +1,5 @@
+import ByteBuffer from 'bytebuffer'
+
 // 👇 Credit: https://stackoverflow.com/a/69585881 👇
 
 const HEX_STRINGS = '0123456789abcdef'
@@ -52,4 +54,8 @@ export const removePrefixIfNeeded = (sessionID: string): string => {
 
 export const isHex = (str: string): boolean => {
   return /^([0-9a-f]{2})+$/i.test(str)
+}
+
+export function Uint8ArrayToBase64(uint8array: Uint8Array): string {
+  return ByteBuffer.wrap(uint8array).toString('base64')
 }

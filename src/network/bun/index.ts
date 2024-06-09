@@ -1,9 +1,10 @@
-import { RequestType, type RequestGetSwarmsBody, type RequestStoreBody } from '@/network/request'
+import { RequestType, type RequestGetSwarmsBody, type RequestPollBody, type RequestStoreBody } from '@/network/request'
 import type { ResponseGetSnodes, ResponseGetSwarms, ResponseStore } from '@/network/response'
 import type { Network } from '@/network'
 import { storeMessage } from './routes/store'
 import { getSnodes } from './routes/get-snodes'
 import { getSwarms } from './routes/get-swarms'
+import { poll } from '@/network/bun/routes/poll'
 
 export async function onRequest(type: RequestType.Store, body: RequestStoreBody): Promise<ResponseStore>
 export async function onRequest(type: RequestType.GetSnodes, body: object): Promise<ResponseGetSnodes>
@@ -18,6 +19,9 @@ export async function onRequest(type: RequestType, body: object): Promise<object
 
     case RequestType.GetSwarms:
       return await getSwarms(body as RequestGetSwarmsBody)
+
+    case RequestType.Poll:
+      return await poll(body as RequestPollBody)
 
     default:
       throw new Error('Invalid request type')

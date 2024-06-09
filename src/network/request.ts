@@ -1,10 +1,12 @@
 import type { Snode } from '@/types/snode'
+import type { RequestNamespace } from '@/types/snode-retrieve'
 import type { Swarm } from '@/types/swarm'
 
 export enum RequestType {
   Store = '/store',
   GetSnodes = '/get_snodes',
-  GetSwarms = '/get_swarms'
+  GetSwarms = '/get_swarms',
+  Poll = '/poll'
 }
 
 export type RequestStoreBody = {
@@ -19,4 +21,9 @@ export type RequestStoreBody = {
 export type RequestGetSwarmsBody = {
   snode: Snode;
   pubkey: string;
+}
+
+export type RequestPollBody = {
+  swarm: Swarm;
+  namespaces: RequestNamespace[];
 }

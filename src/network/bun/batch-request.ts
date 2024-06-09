@@ -10,6 +10,7 @@ import {
 } from './snode-request-types'
 import type { Snode } from '@/types/snode'
 import { SessionRuntimeError, SessionRuntimeErrorCode } from '@/errors/runtime'
+import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
 
 /**
  * When sending a request over onion, we might get two status.
@@ -32,14 +33,12 @@ export interface SnodeResponse {
  * @param subRequests the list of requests to do
  * @param targetNode the node to do the request to, once all the onion routing is done
  * @param timeout the timeout at which we should cancel this request.
- * @param associatedWith used mostly for handling 421 errors, we need the pubkey the change is associated to
  * @param method can be either batch or sequence. A batch call will run all calls even if one of them fails. A sequence call will stop as soon as the first one fails
  */
 export async function doSnodeBatchRequest(
   subRequests: Array<SnodeApiSubRequests>,
   targetNode: Snode,
   timeout: number,
-  associatedWith: string | null,
   method: 'batch' | 'sequence' = 'batch'
 ): Promise<NotEmptyArrayOfBatchResults> {
   if (subRequests.length > MAX_SUBREQUESTS_COUNT) {
@@ -52,13 +51,12 @@ export async function doSnodeBatchRequest(
     method,
     params: { requests: subRequests },
     targetNode,
-    associatedWith,
     timeout,
   })
   if (!result) {
-    throw new SessionRuntimeError({
-      code: SessionRuntimeErrorCode.Generic,
-      message: `doSnodeBatchRequest - sessionRpc could not talk to ${targetNode.public_ip}:${targetNode.storage_port}`
+    throw new SessionFetchError({
+      code: SessionFetchErrorCode.FetchFailed,
+      message: `Couldn't connect to ${targetNode.public_ip}:${targetNode.storage_port}`
     })
   }
   const decoded = decodeBatchRequest(result)

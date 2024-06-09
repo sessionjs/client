@@ -28,7 +28,7 @@ export enum SnodeNamespaces {
    */
   UserGroups = 5,
 
-  /**
+  /** **THIS IS LEGACY AND SHOULD BE USED unless you know how to deal with legacy closed groups**. Use UserGroups instead.
    * The messages sent to a closed group are sent and polled from this namespace
    */
   ClosedGroupMessage = -10,
@@ -36,7 +36,7 @@ export enum SnodeNamespaces {
   /**
    * This is the namespace used to sync the closed group details for each of the closed groups we are polling
    */
-  // ClosedGroupInfo = 1,
+  // ClosedGroupInfo = 1, // This is commented out in Session-desktop too
 }
 
 
@@ -54,6 +54,7 @@ function isUserConfigNamespace(namespace: SnodeNamespaces) {
     case SnodeNamespaces.UserGroups:
     case SnodeNamespaces.ConvoInfoVolatile:
       return true
+    // This is commented out in Session-desktop too
     // case SnodeNamespaces.ClosedGroupInfo:
     case SnodeNamespaces.ClosedGroupMessage:
       return false

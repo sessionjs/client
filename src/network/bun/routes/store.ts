@@ -34,7 +34,6 @@ async function storeOnNode(
     subRequests,
     { public_ip: swarm.ip, storage_port: Number(swarm.port), pubkey_ed25519: swarm.pubkey_ed25519, pubkey_x25519: swarm.pubkey_x25519 },
     4000,
-    params[0].pubkey,
     toDeleteOnSequence ? 'sequence' : 'batch'
   )
 

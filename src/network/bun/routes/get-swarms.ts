@@ -9,7 +9,7 @@ export async function getSwarms({ snode, pubkey }: RequestGetSwarmsBody): Promis
     params: {
       pubkey,
     },
-  }], snode, 10000, null)
+  }], snode, 10000)
   const swarms = result[0].body.snodes as Swarm[]
   return { swarms }
 }

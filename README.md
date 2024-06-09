@@ -18,12 +18,12 @@ Use cases:
 <details>
   <summary>Full roadmap</summary>
     
-  - [ ] Messages receiving
-    - [ ] Automatic snodes fetching
-    - [ ] Automatic swarms selection
+  - [X] Messages receiving
+    - [X] Automatic snodes fetching
+    - [X] Automatic swarms selection
     - [ ] Manual snode/swarm control
-    - [ ] Data retrieving from swarms
-    - [ ] Messages polling
+    - [X] Data retrieving from swarms
+    - [X] Messages polling
     - [ ] Messages types
       - [ ] Regular chat message
         - [ ] Text
@@ -39,25 +39,26 @@ Use cases:
       - [ ] Media downloaded by recipient
     - [ ] Closed chats
     - [ ] Open groups (SOGS)
-  - [ ] Messages sending
-    - [ ] Data storing to swarms
+  - [X] Messages sending
+    - [X] Data storing to swarms
     - [ ] Messages types
       - [ ] Regular chat message
-        - [ ] Text
+        - [X] Text
         - [ ] Attachments
           - [ ] Images
           - [ ] Files
           - [ ] Voice messages
           - [ ] Quotes
           - [ ] Web links previews
-      - [ ] Sync message
+      - [X] Sync message
       - [ ] Read message
       - [ ] Media downloaded by us
   - [ ] Messages deleting
   - [ ] Messages editing (SOGS)
-  - [ ] Profile editing
-    - [ ] Display name
+  - [X] Profile editing
+    - [X] Display name
     - [ ] Avatar
+    - [ ] Some sort of save to the network?
   - [ ] ONS resolving
 
 </details>
@@ -70,7 +71,73 @@ By using this software, you are agreeing to abide by [Terms of use](./TERMS.md).
 2. Create a new Bun project in any directory, using `bun init` or manually
 3. Install session.js: `bun install session-oxen`
 
-## How to use
+## Quick start
+
+### Sending messages
+
+```ts
+import { Session } from 'session-oxen'
+import { ready } from 'session-oxen/sodium'
+await ready
+
+const mnemonic = 'love love love love love love love love love love love love love'
+
+const session = new Session()
+session.setMnemonic(mnemonic, 'Display name')
+const { messageHash, syncMessageHash } = await session.sendMessage({ 
+  to: '054830367d369d94605247999a375dbd0a0f65fdec5de1535612bcb6d4de452c69', 
+  text: 'Hello world' 
+})
+console.log('Sent message with id', hash)
+```
+
+### Polling messages automatically
+```ts
+import { Session } from 'session-oxen'
+import { Poller } from 'session-oxen/polling'
+import { SnodeNamespaces } from 'session-oxen/types'
+import { ready } from 'session-oxen/sodium'
+await ready
+
+const mnemonic = 'love love love love love love love love love love love love love'
+
+const session = new Session()
+session.setMnemonic(mnemonic, 'Display name')
+
+const poller = new Poller()
+session.addPoller(poller)
+
+session.on('message', (msg) => {
+  console.log('Received new message', msg)
+})
+```
+
+You can even attach multiple pollers to instance, for example, to configure interval of polling different namespaces:
+
+```ts
+import { Session } from 'session-oxen'
+import { Poller } from 'session-oxen/polling'
+import { ready } from 'session-oxen/sodium'
+await ready
+
+const mnemonic = 'love love love love love love love love love love love love love'
+
+const session = new Session()
+session.setMnemonic(mnemonic, 'Display name')
+
+// Poll DMs each 5 seconds
+const dmMessagesPoller = new Poller({ interval: 5000, namespaces: new Set([SnodeNamespaces.UserMessages]) })
+// Poll closed group messages manually
+const closedGroupsMessagesPoller = new Poller({ interval: null, namespaces: new Set([SnodeNamespaces.UserGroups]) })
+
+session.addPoller(dmMessagesPoller)
+session.addPoller(closedGroupsMessagesPoller)
+
+// ... Some time later ...
+
+const messages = await closedGroupsMessagesPoller.poll()
+console.log('Received closed group messages', messages)
+```
 
 Make sure to await for initialization of libsodium:
 ```ts
@@ -79,8 +146,6 @@ await ready
 // ...
 ```
 Otherwise you might get errors like `sodium.crypto_sign_seed_keypair is not a function`
-
-TBD
 
 ## Storage
 

@@ -9,7 +9,7 @@ type RetrieveMaxCountSize = { max_count?: number; max_size?: number };
 type RetrieveAlwaysNeeded = {
   pubkey: string;
   namespace: number;
-  last_hash: string;
+  lastHash: string;
   timestamp?: number;
 };
 
@@ -111,7 +111,7 @@ export type StoreOnNodeMessage = {
   pubkey: string;
   timestamp: number;
   namespace: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   message: any; // SharedConfigParams
 };
 
@@ -178,12 +178,12 @@ export type SnodeApiSubRequests =
   | UpdateExpiryOnNodeSubRequest
   | GetExpiriesFromNodeSubRequest;
 
-// eslint-disable-next-line @typescript-eslint/array-type
+ 
 export type NonEmptyArray<T> = [T, ...T[]];
 
 export type NotEmptyArrayOfBatchResults = NonEmptyArray<{
   code: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   body: Record<string, any>;
 }>;
 

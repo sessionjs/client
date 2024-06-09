@@ -19,6 +19,7 @@ import _ from 'lodash'
 import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
 import pRetry from 'p-retry'
 import type { Swarm } from '@/types/swarm'
+import { Poller } from '@/polling'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
 
@@ -32,6 +33,8 @@ export class Session {
   private snodes: Snode[] | undefined
   private ourSwarms: Swarm[] | undefined
   private ourSwarm: Swarm | undefined
+  private pollers = new Set<Poller>()
+  public isAuthorized: boolean = false
 
   constructor(options?: {
     storage: Storage
@@ -46,8 +49,9 @@ export class Session {
     this.storage = options?.storage ?? new InMemoryStorage()
   }
 
-  /** Sets mnemonic for this instance, parses it to keypair. Throws SessionValidationError if mnemonic is invalid */
+  /** Sets mnemonic for this instance, parses it to keypair. Throws SessionValidationError if mnemonic is invalid. Make sure you call this method only once, otherwise it will throw SessionRuntimeError */
   public setMnemonic(mnemonic: string, displayName?: string) {
+    if (this.isAuthorized) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.InstanceAlreadyAuthorized, message: 'Mnemonic can\'t be set after it was already set' })
     mnemonic = mnemonic.trim()
     const words = mnemonic.split(' ')
     if (words.length !== 13) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidMnemonic, message: 'Invalid number of words in mnemonic provided in setMnemonic call. Expected 13 words, got ' + words.length })
@@ -58,6 +62,8 @@ export class Session {
     if (displayName !== undefined) {
       this.setDisplayName(displayName)
     }
+    this.isAuthorized = true
+    this.pollers.forEach(poller => poller.startPolling())
   }
 
   /** Returns mnemonic of this instance or undefined, if you haven't set it with setMnemonic yet */
@@ -256,5 +262,19 @@ export class Session {
       this.snodes = snodes
     }
     return this.snodes
+  }
+
+  async resolveONS() {
+    
+  }
+
+  async addPoller(poller: Poller) {
+    if (!(poller instanceof Poller)) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidPoller, message: 'Poller must be an instance of Poller' })
+    this.pollers.add(poller)
+    poller._attachedToInstance(this)
+  }
+
+  async getKeypair() {
+    return this.keypair
   }
 }

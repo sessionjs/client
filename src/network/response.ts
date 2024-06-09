@@ -1,4 +1,6 @@
+import type { SnodeNamespaces } from '@/types/namespaces'
 import type { Snode } from '@/types/snode'
+import type { RetrieveMessageItem } from '@/types/snode-retrieve'
 import type { Swarm } from '@/types/swarm'
 
 export type ResponseStore = {
@@ -11,4 +13,8 @@ export type ResponseGetSnodes = {
 
 export type ResponseGetSwarms = {
   swarms: Swarm[]
+}
+
+export type ResponsePoll = {
+  messages: { namespace: SnodeNamespaces, messages: RetrieveMessageItem[] }[]
 }
