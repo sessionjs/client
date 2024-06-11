@@ -1,6 +1,6 @@
 {
   "name": "session-oxen",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "module": "src/index.ts",
   "type": "module",
   "homepage": "https://github.com/VityaSchel/session.js",
