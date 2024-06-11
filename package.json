@@ -1,22 +1,47 @@
 {
   "name": "session-oxen",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "module": "src/index.ts",
   "type": "module",
   "homepage": "https://github.com/VityaSchel/session.js",
   "scripts": {
+    "types": "tsc --project tsconfig.publish.json",
     "protobuf": "pbjs --target static-module --wrap es6 --out src/signal-service/compiled.js src/signal-service/signalservice.proto && pbts --out src/signal-service/compiled.d.ts src/signal-service/compiled.js --force-long"
   },
   "types": "types/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./polling": "./src/polling/index.ts",
-    "./sodium": "./src/sodium/index.ts",
-    "./storage": "./src/storage/index.ts",
-    "./errors": "./src/errors/index.ts",
-    "./mnemonic": "./src/mnemonic/index.ts",
-    "./keypair": "./src/keypair/index.ts",
-    "./consts": "./src/consts/index.ts"
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./types/index.d.ts"
+    },
+    "./polling": {
+      "import": "./src/polling/index.ts",
+      "types": "./types/polling/index.d.ts"
+    },
+    "./sodium": {
+      "import": "./src/sodium/index.ts",
+      "types": "./types/sodium/index.d.ts"
+    },
+    "./storage": {
+      "import": "./src/storage/index.ts",
+      "types": "./types/storage/index.d.ts"
+    },
+    "./errors": {
+      "import": "./src/errors/index.ts",
+      "types": "./types/errors/index.d.ts"
+    },
+    "./mnemonic": {
+      "import": "./src/mnemonic/index.ts",
+      "types": "./types/mnemonic/index.d.ts"
+    },
+    "./keypair": {
+      "import": "./src/keypair/index.ts",
+      "types": "./types/keypair/index.d.ts"
+    },
+    "./consts": {
+      "import": "./src/consts/index.ts",
+      "types": "./types/consts/index.d.ts"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
@@ -39,6 +64,8 @@
     "src/**/*.js",
     "src/**/*.d.ts",
     "src/**/*.json",
+    "tsconfig.json",
+    "types/**/*.d.ts",
     "README.md"
   ],
   "dependencies": {

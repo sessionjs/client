@@ -20,7 +20,7 @@ import { SessionFetchError, SessionFetchErrorCode } from '@session-oxen/errors/f
 import pRetry from 'p-retry'
 import type { Swarm } from '@session-oxen/types/swarm'
 import { Poller } from '@session-oxen/polling'
-import type { EventCallback, EventName } from '@session-oxen/instance/events'
+import type { EventCallback, EventName } from './events'
 import { signalMessageToMessage } from '@session-oxen/messages'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g

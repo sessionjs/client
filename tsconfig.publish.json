@@ -7,6 +7,8 @@
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
 
     // Bundler mode
     "moduleResolution": "bundler",
@@ -25,7 +27,8 @@
     "baseUrl": ".",
     "paths": {
       "@session-oxen/*": ["src/*"],
-    }
+    },
+    "outDir": "types"
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
 }
