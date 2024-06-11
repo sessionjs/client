@@ -1,7 +1,7 @@
 {
   "editor.tabCompletion": "on",
   "path-intellisense.mappings": {
-    "@/*": "${workspaceFolder}/src/*"
+    "@session-oxen/*": "${workspaceFolder}/src/*"
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"

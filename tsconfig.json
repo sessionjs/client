@@ -25,7 +25,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@session-oxen/*": ["src/*"],
     }
   }
 }

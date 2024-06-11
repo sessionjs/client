@@ -1,8 +1,8 @@
 import { expect, test } from 'bun:test'
-import { Session } from '../src'
-import { Poller } from '../src/polling'
-import { ready } from '../src/sodium'
-import type { Message } from '../src/messages'
+import { Session } from '@session-oxen/index'
+import { Poller } from '@session-oxen/polling'
+import { ready } from '@session-oxen/sodium'
+import type { Message } from '@session-oxen/messages'
 await ready
 
 test('polling messages', async () => {

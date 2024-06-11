@@ -1,8 +1,8 @@
-import { Session } from '../src'
-import { Poller } from '../src/polling'
-import { encode } from '../src/mnemonic'
-import { generateSeedHex } from '../src/keypair'
-import { ready } from '../src/sodium'
+import { Session } from '@session-oxen/index'
+import { Poller } from '@session-oxen/polling'
+import { encode } from '@session-oxen/mnemonic'
+import { generateSeedHex } from '@session-oxen/keypair'
+import { ready } from '@session-oxen/sodium'
 await ready
 
 const mnemonic = encode(generateSeedHex())

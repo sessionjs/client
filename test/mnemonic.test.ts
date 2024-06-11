@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { encode, decode } from '../src/mnemonic'
+import { encode, decode } from '@session-oxen/mnemonic'
 
 test('encoding mnemonic', () => {
   const encodedMnemonic = encode('39038c8988db02c1af44e8c847bd9713')
