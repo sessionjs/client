@@ -111,7 +111,7 @@ export class Session {
     const msg = new VisibleMessage({
       body: text,
       lokiProfile: {
-        displayName: this.displayName ?? `(${this.sessionID.slice(0, 3)}...${this.sessionID.slice(0, 3)})`,
+        displayName: this.displayName ?? `(${this.sessionID.slice(0, 3)}...${this.sessionID.slice(-3)})`,
         avatarPointer: undefined,
         profileKey: null//new Uint8Array(keypair.pubKey),
       },
@@ -291,7 +291,7 @@ export class Session {
     return this.keypair
   }
 
-  events: Map<EventName, EventCallback<EventName>[]> = new Map()
+  private events: Map<EventName, EventCallback<EventName>[]> = new Map()
   on<E extends EventName>(eventName: E, callback: EventCallback<E>) {
     this.addEventListener(eventName, callback)
   }

@@ -3,8 +3,20 @@
   "version": "0.0.2",
   "module": "src/index.ts",
   "type": "module",
+  "homepage": "https://github.com/VityaSchel/session.js",
   "scripts": {
     "protobuf": "pbjs --target static-module --wrap es6 --out src/signal-service/compiled.js src/signal-service/signalservice.proto && pbts --out src/signal-service/compiled.d.ts src/signal-service/compiled.js --force-long"
+  },
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./polling": "./src/polling/index.ts",
+    "./sodium": "./src/sodium/index.ts",
+    "./storage": "./src/storage/index.ts",
+    "./errors": "./src/errors/index.ts",
+    "./mnemonic": "./src/mnemonic/index.ts",
+    "./keypair": "./src/keypair/index.ts",
+    "./consts": "./src/consts/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
