@@ -1,7 +1,7 @@
-import { doSnodeBatchRequest } from '@session-oxen/network/bun/batch-request'
-import type { RequestGetSwarmsBody } from '@session-oxen/network/request'
-import type { ResponseGetSwarms } from '@session-oxen/network/response'
-import type { Swarm } from '@session-oxen/types/swarm'
+import { doSnodeBatchRequest } from '@/network/bun/batch-request'
+import type { RequestGetSwarmsBody } from '@/network/request'
+import type { ResponseGetSwarms } from '@/network/response'
+import type { Swarm } from '@/types/swarm'
 
 export async function getSwarms({ snode, pubkey }: RequestGetSwarmsBody): Promise<ResponseGetSwarms> {
   const result = await doSnodeBatchRequest([{

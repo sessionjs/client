@@ -8,9 +8,9 @@ import {
   type NotEmptyArrayOfBatchResults,
   type SnodeApiSubRequests,
 } from './snode-request-types'
-import type { Snode } from '@session-oxen/types/snode'
-import { SessionRuntimeError, SessionRuntimeErrorCode } from '@session-oxen/errors/runtime'
-import { SessionFetchError, SessionFetchErrorCode } from '@session-oxen/errors/fetch'
+import type { Snode } from '@/types/snode'
+import { SessionRuntimeError, SessionRuntimeErrorCode } from '@/errors/runtime'
+import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
 
 /**
  * When sending a request over onion, we might get two status.

@@ -1,8 +1,8 @@
 import https from 'https'
 import { clone } from 'lodash'
-import type { Snode } from '@session-oxen/types/snode'
+import type { Snode } from '@/types/snode'
 import type { SnodeResponse } from './batch-request'
-import { SessionFetchError, SessionFetchErrorCode } from '@session-oxen/errors/fetch'
+import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
 
 export const ERROR_421_HANDLED_RETRY_REQUEST = '421 handled. Retry this request with a new snode.'
 

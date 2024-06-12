@@ -3,10 +3,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { isEmpty } from 'lodash'
-import { SignalService } from '@session-oxen/signal-service'
+import { SignalService } from '@/signal-service'
 import { ExpirableMessage, type ExpirableMessageParams } from '../expirable-message'
 import type { LokiProfile } from '../signal-message'
-import type { Reaction } from '@session-oxen/reactions'
+import type { Reaction } from '@/reactions'
 
 interface AttachmentPointerCommon {
   contentType?: string;

@@ -1,9 +1,9 @@
 // CREDIT: OXEN, Session-Desktop
 // github.com/oxen-io/session-desktop
 
-import { SignalService } from '@session-oxen/signal-service'
-import { DURATION, TTL_DEFAULT } from '@session-oxen/consts'
-import type { DisappearingMessageType } from '@session-oxen/types/disappearing-message'
+import { SignalService } from '@/signal-service'
+import { DURATION, TTL_DEFAULT } from '@/consts'
+import type { DisappearingMessageType } from '@/types/disappearing-message'
 import { ContentMessage, type MessageParams } from './signal-message'
 
 export interface ExpirableMessageParams extends MessageParams {

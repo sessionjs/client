@@ -1,8 +1,8 @@
 import { expect, test } from 'bun:test'
-import { decode } from '@session-oxen/mnemonic'
-import { getKeypairFromSeed } from '@session-oxen/keypair'
-import { Uint8ArrayToHex } from '@session-oxen/utils'
-import { ready } from '@session-oxen/sodium'
+import { decode } from '@/mnemonic'
+import { getKeypairFromSeed } from '@/keypair'
+import { Uint8ArrayToHex } from '@/utils'
+import { ready } from '@/sodium'
 await ready
 
 const tests = [

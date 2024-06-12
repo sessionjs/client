@@ -4,9 +4,9 @@ import { concatUInt8Array, hexToUint8Array, removePrefixIfNeeded } from '../util
 import sodium from 'libsodium-wrappers-sumo'
 import type { Keypair } from '../keypair'
 import { isNil, toNumber } from 'lodash'
-import { SnodeNamespaces } from '@session-oxen/types/namespaces'
+import { SnodeNamespaces } from '@/types/namespaces'
 import ByteBuffer from 'bytebuffer'
-import { SessionCryptoError, SessionCryptoErrorCode } from '@session-oxen/errors/crypto'
+import { SessionCryptoError, SessionCryptoErrorCode } from '@/errors/crypto'
 
 export type EncryptResult = {
   envelopeType: SignalService.Envelope.Type

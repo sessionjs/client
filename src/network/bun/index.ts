@@ -1,10 +1,10 @@
-import { RequestType, type RequestGetSwarmsBody, type RequestPollBody, type RequestStoreBody } from '@session-oxen/network/request'
-import type { ResponseGetSnodes, ResponseGetSwarms, ResponseStore } from '@session-oxen/network/response'
-import type { Network } from '@session-oxen/network'
+import { RequestType, type RequestGetSwarmsBody, type RequestPollBody, type RequestStoreBody } from '@/network/request'
+import type { ResponseGetSnodes, ResponseGetSwarms, ResponseStore } from '@/network/response'
+import type { Network } from '@/network'
 import { storeMessage } from './routes/store'
 import { getSnodes } from './routes/get-snodes'
 import { getSwarms } from './routes/get-swarms'
-import { poll } from '@session-oxen/network/bun/routes/poll'
+import { poll } from '@/network/bun/routes/poll'
 
 export async function onRequest(type: RequestType.Store, body: RequestStoreBody): Promise<ResponseStore>
 export async function onRequest(type: RequestType.GetSnodes, body: object): Promise<ResponseGetSnodes>

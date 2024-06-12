@@ -1,6 +1,6 @@
-import type { Snode } from '@session-oxen/types/snode'
-import type { RequestNamespace } from '@session-oxen/types/snode-retrieve'
-import type { Swarm } from '@session-oxen/types/swarm'
+import type { Snode } from '@/types/snode'
+import type { RequestNamespace } from '@/types/snode-retrieve'
+import type { Swarm } from '@/types/swarm'
 
 export enum RequestType {
   Store = '/store',

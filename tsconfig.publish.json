@@ -8,11 +8,9 @@
     "jsx": "react-jsx",
     "allowJs": true,
     "declaration": true,
-    "emitDeclarationOnly": true,
 
     // Bundler mode
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
 
     // Best practices
@@ -26,9 +24,9 @@
     "noPropertyAccessFromIndexSignature": false,
     "baseUrl": ".",
     "paths": {
-      "@session-oxen/*": ["src/*"],
+      "@/*": ["src/*"],
     },
-    "outDir": "types"
+    "outDir": "./dist",
   },
   "include": ["src/**/*.ts"],
 }

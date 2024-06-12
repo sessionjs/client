@@ -1,7 +1,7 @@
-import type { Snode } from '@session-oxen/types/snode'
+import type { Snode } from '@/types/snode'
 import { seeds } from '../seeds'
-import { SessionFetchError, SessionFetchErrorCode } from '@session-oxen/errors/fetch'
-import type { ResponseGetSnodes } from '@session-oxen/network/response'
+import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
+import type { ResponseGetSnodes } from '@/network/response'
 
 export async function getSnodes(): Promise<ResponseGetSnodes> {
   for(const seed of seeds) {

@@ -5,43 +5,19 @@
   "type": "module",
   "homepage": "https://github.com/VityaSchel/session.js",
   "scripts": {
-    "types": "tsc --project tsconfig.publish.json",
+    "build": "tsc --project tsconfig.publish.json",
     "protobuf": "pbjs --target static-module --wrap es6 --out src/signal-service/compiled.js src/signal-service/signalservice.proto && pbts --out src/signal-service/compiled.d.ts src/signal-service/compiled.js --force-long"
   },
   "types": "types/index.d.ts",
   "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "types": "./types/index.d.ts"
-    },
-    "./polling": {
-      "import": "./src/polling/index.ts",
-      "types": "./types/polling/index.d.ts"
-    },
-    "./sodium": {
-      "import": "./src/sodium/index.ts",
-      "types": "./types/sodium/index.d.ts"
-    },
-    "./storage": {
-      "import": "./src/storage/index.ts",
-      "types": "./types/storage/index.d.ts"
-    },
-    "./errors": {
-      "import": "./src/errors/index.ts",
-      "types": "./types/errors/index.d.ts"
-    },
-    "./mnemonic": {
-      "import": "./src/mnemonic/index.ts",
-      "types": "./types/mnemonic/index.d.ts"
-    },
-    "./keypair": {
-      "import": "./src/keypair/index.ts",
-      "types": "./types/keypair/index.d.ts"
-    },
-    "./consts": {
-      "import": "./src/consts/index.ts",
-      "types": "./types/consts/index.d.ts"
-    }
+    ".": "./dist/index.js",
+    "./polling": "./dist/polling/index.hs",
+    "./sodium": "./dist/sodium/index.js",
+    "./storage": "./dist/storage/index.js",
+    "./errors": "./dist/errors/index.js",
+    "./mnemonic": "./dist/mnemonic/index.js",
+    "./keypair": "./dist/keypair/index.js",
+    "./consts": "./dist/consts/index.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
@@ -60,12 +36,9 @@
     "typescript": "^5.0.0"
   },
   "files": [
-    "src/**/*.ts",
-    "src/**/*.js",
-    "src/**/*.d.ts",
-    "src/**/*.json",
-    "tsconfig.json",
-    "types/**/*.d.ts",
+    "dist/**/*.js",
+    "dist/**/*.json",
+    "dist/**/*.d.ts",
     "README.md"
   ],
   "dependencies": {

@@ -1,5 +1,5 @@
-import { SignalService } from '@session-oxen/signal-service'
-import type { EnvelopePlus } from '@session-oxen/types/envelope'
+import { SignalService } from '@/signal-service'
+import type { EnvelopePlus } from '@/types/envelope'
 
 export function signalMessageToMessage({ hash, envelope, content }: {
   hash: string, 

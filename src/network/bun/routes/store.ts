@@ -1,9 +1,9 @@
-import { SessionFetchError, SessionFetchErrorCode } from '@session-oxen/errors/fetch'
-import { doSnodeBatchRequest } from '@session-oxen/network/bun/batch-request'
-import type { DeleteByHashesFromNodeParams, DeleteFromNodeSubRequest, NotEmptyArrayOfBatchResults, StoreOnNodeParams, StoreOnNodeSubRequest } from '@session-oxen/network/bun/snode-request-types'
-import type { RequestStoreBody } from '@session-oxen/network/request'
-import type { ResponseStore } from '@session-oxen/network/response'
-import type { Swarm } from '@session-oxen/types/swarm'
+import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
+import { doSnodeBatchRequest } from '@/network/bun/batch-request'
+import type { DeleteByHashesFromNodeParams, DeleteFromNodeSubRequest, NotEmptyArrayOfBatchResults, StoreOnNodeParams, StoreOnNodeSubRequest } from '@/network/bun/snode-request-types'
+import type { RequestStoreBody } from '@/network/request'
+import type { ResponseStore } from '@/network/response'
+import type { Swarm } from '@/types/swarm'
 import { isEmpty } from 'lodash'
 
 export async function storeMessage({ swarm, data64, destination, namespace, timestamp, ttl }: RequestStoreBody): Promise<ResponseStore> {

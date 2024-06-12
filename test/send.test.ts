@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
-import { Session } from '@session-oxen/instance'
-import { ready } from '@session-oxen/sodium'
+import { Session } from '@/instance'
+import { ready } from '@/sodium'
 await ready
 
 test('send message to the Session user', async () => {

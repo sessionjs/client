@@ -1,7 +1,7 @@
 // CREDIT: OXEN, Session-Desktop
 // github.com/oxen-io/session-desktop
 
-import { SnodeNamespaces } from '@session-oxen/types/namespaces'
+import { SnodeNamespaces } from '@/types/namespaces'
 
 export type SwarmForSubRequest = { method: 'get_swarm'; params: { pubkey: string } };
 

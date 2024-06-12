@@ -1,4 +1,4 @@
-import type { Message } from '@session-oxen/messages'
+import type { Message } from '../messages'
 
 export type EventCallbackSignatures = {
   message: (message: Message) => void;
