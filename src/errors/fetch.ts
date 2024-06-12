@@ -4,6 +4,7 @@ export enum SessionFetchErrorCode {
   NoSwarmsAvailable = 'no_swarms_available',
   FetchFailed = 'fetch_failed',
   InvalidResponse = 'invalid_response',
+  PollingFailed = 'polling_failed',
 }
 
 /** Generic error for cases where developer does something incorrectly */

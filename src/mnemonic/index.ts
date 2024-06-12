@@ -17,7 +17,7 @@ function getChecksumIndex(words: Array<string>, prefixLen: number) {
   return index
 }
 
-/** Turns 13-words mnemonic phrase to seed's hex */
+/** Turns seed's hex to 13-words mnemonic phrase */
 export function encode(str: string, wordsetName: MnemonicWordset = MnemonicWordset.english): string {
   const wordset = mnemonicLanguages[wordsetName]
   let out: string[] = []
@@ -47,7 +47,7 @@ function swapEndian4byte(str: string) {
   return str.slice(6, 8) + str.slice(4, 6) + str.slice(2, 4) + str.slice(0, 2)
 }
 
-/** Turns seed's hex to 13-words mnemonic phrase */
+/** Turns 13-words mnemonic phrase to seed's hex */
 export function decode(str: string, wordsetName: MnemonicWordset = MnemonicWordset.english): string {
   const wordset = mnemonicLanguages[wordsetName]
   let out = ''

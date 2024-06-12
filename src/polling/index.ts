@@ -1,5 +1,6 @@
 import { decodeMessage, decryptMessage, extractContent } from '@/crypto/message-decrypt'
 import { getSnodeSignatureParams } from '@/crypto/signature'
+import { SessionFetchError, SessionFetchErrorCode } from '@/errors'
 import { SessionRuntimeError, SessionRuntimeErrorCode } from '@/errors/runtime'
 import { Session } from '@/instance'
 import type { Keypair } from '@/keypair'
@@ -10,6 +11,7 @@ import { StorageKeys, type Storage } from '@/storage'
 import type { EnvelopePlus } from '@/types/envelope'
 import { SnodeNamespace, SnodeNamespaces } from '@/types/namespaces'
 import type { RequestNamespace } from '@/types/snode-retrieve'
+import type { Swarm } from '@/types/swarm'
 import _ from 'lodash'
 import { z } from 'zod'
 
@@ -20,6 +22,7 @@ type InstanceMethodsForPoller = {
   onMessagesReceived: (messages: { hash: string, envelope: EnvelopePlus, content: SignalService.Content }[]) => void
   updateLastHashes: (hashes: { namespace: SnodeNamespaces, lastHash: string }[]) => void
   storage: Storage
+  onSwarmConnectionFailed: (swarm: Swarm) => Swarm | undefined
 }
 
 export class Poller {
@@ -112,27 +115,44 @@ export class Poller {
     const { updateLastHashes, onMessagesReceived } = this.methods!
 
     const sessionID = this.instance.getSessionID()
-    const ourSwarm = await this.instance.getOurSwarm()
+    let ourSwarm = await this.instance.getOurSwarm()
 
     const lastHashes = await this.getLastHashes()
     
-    const { messages } = await this.instance.request<ResponsePoll, RequestPollBody>({
-      type: RequestType.Poll,
-      body: {
-        swarm: ourSwarm,
-        namespaces: Array.from(this.namespaces.values()).map<RequestNamespace>(namespace => ({
-          namespace,
-          pubkey: sessionID,
-          isOurPubkey: true,
-          signature: getSnodeSignatureParams({
-            ed25519Key: keypair.ed25519,
-            method: 'retrieve',
-            namespace: namespace
-          }),
-          lastHash: lastHashes.find(h => h.namespace === namespace)?.lastHash
-        })),
+    let messages: ResponsePoll['messages'] | undefined = undefined
+    do {
+      try {
+        const response = await this.instance.request<ResponsePoll, RequestPollBody>({
+          type: RequestType.Poll,
+          body: {
+            swarm: ourSwarm,
+            namespaces: Array.from(this.namespaces.values()).map<RequestNamespace>(namespace => ({
+              namespace,
+              pubkey: sessionID,
+              isOurPubkey: true,
+              signature: getSnodeSignatureParams({
+                ed25519Key: keypair.ed25519,
+                method: 'retrieve',
+                namespace: namespace
+              }),
+              lastHash: lastHashes.find(h => h.namespace === namespace)?.lastHash
+            })),
+          }
+        })
+        messages = response.messages
+      } catch(e) {
+        if(e instanceof SessionFetchError && e.code === SessionFetchErrorCode.FetchFailed) {
+          const nextSwarm = methods.onSwarmConnectionFailed(ourSwarm)
+          if (nextSwarm) {
+            ourSwarm = nextSwarm
+          } else {
+            throw new SessionFetchError({ code: SessionFetchErrorCode.PollingFailed, message: 'Ran out of swarms for polling' })
+          }
+        } else {
+          throw e
+        }
       }
-    })
+    } while(messages === undefined)
 
     const userConfigMessages = _.flatten(
       _.compact(

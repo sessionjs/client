@@ -86,13 +86,18 @@ async function doRequest({
     'Content-Type': 'application/json',
   }
 
-  const response = await fetch(url, {
-    ...fetchOptions,
-    body: fetchOptions.body || undefined,
-    tls: {
-      rejectUnauthorized: false,
-    }
-  })
+  let response: Response
+  try {
+    response = await fetch(url, {
+      ...fetchOptions,
+      body: fetchOptions.body || undefined,
+      tls: {
+        rejectUnauthorized: false,
+      }
+    })
+  } catch(e) {
+    throw new SessionFetchError({ code: SessionFetchErrorCode.FetchFailed, message: 'Couldn\'t fetch ' + url })
+  }
   if (response.status === 421) {
     throw new SessionFetchError({ code: SessionFetchErrorCode.RetryWithOtherNode421Error, message: ERROR_421_HANDLED_RETRY_REQUEST })
   }

@@ -283,7 +283,13 @@ export class Session {
       updateLastHashes: (hashes) => {
         this.storage.set(StorageKeys.LastHashes, JSON.stringify(hashes))
       },
-      storage: this.storage
+      storage: this.storage,
+      onSwarmConnectionFailed: (swarm: Swarm) => {
+        this.ourSwarms = this.ourSwarms?.filter(s => s !== swarm)
+        const nextSwarm = _.sample(this.ourSwarms)
+        this.ourSwarm = nextSwarm
+        return nextSwarm
+      }
     })
   }
 
