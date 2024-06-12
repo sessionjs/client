@@ -1,17 +1,17 @@
 {
   "name": "session-oxen",
-  "version": "0.0.7",
-  "module": "src/index.ts",
+  "version": "0.0.8",
   "type": "module",
   "homepage": "https://github.com/VityaSchel/session.js",
   "scripts": {
-    "build": "tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json",
+    "build": "tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json && cp src/signal-service/compiled.js dist/signal-service/compiled.js && cp src/signal-service/compiled.d.ts dist/signal-service/compiled.d.ts",
     "protobuf": "pbjs --target static-module --wrap es6 --out src/signal-service/compiled.js src/signal-service/signalservice.proto && pbts --out src/signal-service/compiled.d.ts src/signal-service/compiled.js --force-long"
   },
+  "main": "dist/index.js",
   "types": "types/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./polling": "./dist/polling/index.hs",
+    "./polling": "./dist/polling/index.js",
     "./sodium": "./dist/sodium/index.js",
     "./storage": "./dist/storage/index.js",
     "./errors": "./dist/errors/index.js",
