@@ -1,8 +1,9 @@
 {
   "name": "session-oxen",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "type": "module",
   "homepage": "https://github.com/VityaSchel/session.js",
+  "license": "MIT",
   "scripts": {
     "build": "tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json && cp src/signal-service/compiled.js dist/signal-service/compiled.js && cp src/signal-service/compiled.d.ts dist/signal-service/compiled.d.ts",
     "protobuf": "pbjs --target static-module --wrap es6 --out src/signal-service/compiled.js src/signal-service/signalservice.proto && pbts --out src/signal-service/compiled.d.ts src/signal-service/compiled.js --force-long"
@@ -28,7 +29,6 @@
     "@types/uuid": "^9.0.8",
     "eslint": "9.x",
     "globals": "^15.4.0",
-    "protobufjs": "^7.3.0",
     "protobufjs-cli": "^1.1.2",
     "tsc-alias": "^1.8.10",
     "typescript-eslint": "^7.12.0"
@@ -49,7 +49,8 @@
     "lodash": "^4.17.21",
     "p-retry": "^6.2.0",
     "uuid": "^9.0.1",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "protobufjs": "^7.3.0"
   },
   "trustedDependencies": [
     "protobufjs"
