@@ -275,7 +275,9 @@ export class Session {
     this.pollers.add(poller)
     poller._attachedToInstance(this, {
       onMessagesReceived: (messages) => {
-        const dataMessages = messages.filter(m => m.content.dataMessage)
+        const dataMessages = messages
+          .filter(m => m.content.dataMessage)
+          .filter(m => typeof m.content.dataMessage?.syncTarget !== 'string')
         this.events.get('message')?.forEach(cb => {
           dataMessages.forEach(m => cb(signalMessageToMessage(m)))
         })
