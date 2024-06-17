@@ -1,5 +1,5 @@
-import * as $protobuf from "protobufjs";
-import Long = require("long");
+import * as $protobuf from 'protobufjs'
+import Long = require('long');
 /** Namespace signalservice. */
 export namespace signalservice {
 
@@ -29,16 +29,16 @@ export namespace signalservice {
         constructor(properties?: signalservice.IEnvelope);
 
         /** Envelope type. */
-        public type: signalservice.Envelope.Type;
+        public type: signalservice.Envelope.Type
 
         /** Envelope source. */
-        public source: string;
+        public source: string
 
         /** Envelope timestamp. */
-        public timestamp: (number|Long);
+        public timestamp: (number|Long)
 
         /** Envelope content. */
-        public content: Uint8Array;
+        public content: Uint8Array
 
         /**
          * Creates a new Envelope instance using the specified properties.
@@ -147,10 +147,10 @@ export namespace signalservice {
         constructor(properties?: signalservice.ITypingMessage);
 
         /** TypingMessage timestamp. */
-        public timestamp: (number|Long);
+        public timestamp: (number|Long)
 
         /** TypingMessage action. */
-        public action: signalservice.TypingMessage.Action;
+        public action: signalservice.TypingMessage.Action
 
         /**
          * Creates a new TypingMessage instance using the specified properties.
@@ -259,10 +259,10 @@ export namespace signalservice {
         constructor(properties?: signalservice.IUnsend);
 
         /** Unsend timestamp. */
-        public timestamp: (number|Long);
+        public timestamp: (number|Long)
 
         /** Unsend author. */
-        public author: string;
+        public author: string
 
         /**
          * Creates a new Unsend instance using the specified properties.
@@ -365,13 +365,13 @@ export namespace signalservice {
         constructor(properties?: signalservice.IMessageRequestResponse);
 
         /** MessageRequestResponse isApproved. */
-        public isApproved: boolean;
+        public isApproved: boolean
 
         /** MessageRequestResponse profileKey. */
-        public profileKey: Uint8Array;
+        public profileKey: Uint8Array
 
         /** MessageRequestResponse profile. */
-        public profile?: (signalservice.DataMessage.ILokiProfile|null);
+        public profile?: (signalservice.DataMessage.ILokiProfile|null)
 
         /**
          * Creates a new MessageRequestResponse instance using the specified properties.
@@ -474,13 +474,13 @@ export namespace signalservice {
         constructor(properties?: signalservice.ISharedConfigMessage);
 
         /** SharedConfigMessage kind. */
-        public kind: signalservice.SharedConfigMessage.Kind;
+        public kind: signalservice.SharedConfigMessage.Kind
 
         /** SharedConfigMessage seqno. */
-        public seqno: (number|Long);
+        public seqno: (number|Long)
 
         /** SharedConfigMessage data. */
-        public data: Uint8Array;
+        public data: Uint8Array
 
         /**
          * Creates a new SharedConfigMessage instance using the specified properties.
@@ -618,37 +618,37 @@ export namespace signalservice {
         constructor(properties?: signalservice.IContent);
 
         /** Content dataMessage. */
-        public dataMessage?: (signalservice.IDataMessage|null);
+        public dataMessage?: (signalservice.IDataMessage|null)
 
         /** Content callMessage. */
-        public callMessage?: (signalservice.ICallMessage|null);
+        public callMessage?: (signalservice.ICallMessage|null)
 
         /** Content receiptMessage. */
-        public receiptMessage?: (signalservice.IReceiptMessage|null);
+        public receiptMessage?: (signalservice.IReceiptMessage|null)
 
         /** Content typingMessage. */
-        public typingMessage?: (signalservice.ITypingMessage|null);
+        public typingMessage?: (signalservice.ITypingMessage|null)
 
         /** Content configurationMessage. */
-        public configurationMessage?: (signalservice.IConfigurationMessage|null);
+        public configurationMessage?: (signalservice.IConfigurationMessage|null)
 
         /** Content dataExtractionNotification. */
-        public dataExtractionNotification?: (signalservice.IDataExtractionNotification|null);
+        public dataExtractionNotification?: (signalservice.IDataExtractionNotification|null)
 
         /** Content unsendMessage. */
-        public unsendMessage?: (signalservice.IUnsend|null);
+        public unsendMessage?: (signalservice.IUnsend|null)
 
         /** Content messageRequestResponse. */
-        public messageRequestResponse?: (signalservice.IMessageRequestResponse|null);
+        public messageRequestResponse?: (signalservice.IMessageRequestResponse|null)
 
         /** Content sharedConfigMessage. */
-        public sharedConfigMessage?: (signalservice.ISharedConfigMessage|null);
+        public sharedConfigMessage?: (signalservice.ISharedConfigMessage|null)
 
         /** Content expirationType. */
-        public expirationType: signalservice.Content.ExpirationType;
+        public expirationType: signalservice.Content.ExpirationType
 
         /** Content expirationTimer. */
-        public expirationTimer: number;
+        public expirationTimer: number
 
         /**
          * Creates a new Content instance using the specified properties.
@@ -758,10 +758,10 @@ export namespace signalservice {
         constructor(properties?: signalservice.IKeyPair);
 
         /** KeyPair publicKey. */
-        public publicKey: Uint8Array;
+        public publicKey: Uint8Array
 
         /** KeyPair privateKey. */
-        public privateKey: Uint8Array;
+        public privateKey: Uint8Array
 
         /**
          * Creates a new KeyPair instance using the specified properties.
@@ -861,10 +861,10 @@ export namespace signalservice {
         constructor(properties?: signalservice.IDataExtractionNotification);
 
         /** DataExtractionNotification type. */
-        public type: signalservice.DataExtractionNotification.Type;
+        public type: signalservice.DataExtractionNotification.Type
 
         /** DataExtractionNotification timestamp. */
-        public timestamp: (number|Long);
+        public timestamp: (number|Long)
 
         /**
          * Creates a new DataExtractionNotification instance using the specified properties.
@@ -1012,49 +1012,49 @@ export namespace signalservice {
         constructor(properties?: signalservice.IDataMessage);
 
         /** DataMessage body. */
-        public body: string;
+        public body: string
 
         /** DataMessage attachments. */
-        public attachments: signalservice.IAttachmentPointer[];
+        public attachments: signalservice.IAttachmentPointer[]
 
         /** DataMessage group. */
-        public group?: (signalservice.IGroupContext|null);
+        public group?: (signalservice.IGroupContext|null)
 
         /** DataMessage flags. */
-        public flags: number;
+        public flags: number
 
         /** DataMessage expireTimer. */
-        public expireTimer: number;
+        public expireTimer: number
 
         /** DataMessage profileKey. */
-        public profileKey: Uint8Array;
+        public profileKey: Uint8Array
 
         /** DataMessage timestamp. */
-        public timestamp: (number|Long);
+        public timestamp: (number|Long)
 
         /** DataMessage quote. */
-        public quote?: (signalservice.DataMessage.IQuote|null);
+        public quote?: (signalservice.DataMessage.IQuote|null)
 
         /** DataMessage preview. */
-        public preview: signalservice.DataMessage.IPreview[];
+        public preview: signalservice.DataMessage.IPreview[]
 
         /** DataMessage reaction. */
-        public reaction?: (signalservice.DataMessage.IReaction|null);
+        public reaction?: (signalservice.DataMessage.IReaction|null)
 
         /** DataMessage profile. */
-        public profile?: (signalservice.DataMessage.ILokiProfile|null);
+        public profile?: (signalservice.DataMessage.ILokiProfile|null)
 
         /** DataMessage openGroupInvitation. */
-        public openGroupInvitation?: (signalservice.DataMessage.IOpenGroupInvitation|null);
+        public openGroupInvitation?: (signalservice.DataMessage.IOpenGroupInvitation|null)
 
         /** DataMessage closedGroupControlMessage. */
-        public closedGroupControlMessage?: (signalservice.DataMessage.IClosedGroupControlMessage|null);
+        public closedGroupControlMessage?: (signalservice.DataMessage.IClosedGroupControlMessage|null)
 
         /** DataMessage syncTarget. */
-        public syncTarget: string;
+        public syncTarget: string
 
         /** DataMessage blocksCommunityMessageRequests. */
-        public blocksCommunityMessageRequests: boolean;
+        public blocksCommunityMessageRequests: boolean
 
         /**
          * Creates a new DataMessage instance using the specified properties.
@@ -1167,16 +1167,16 @@ export namespace signalservice {
             constructor(properties?: signalservice.DataMessage.IReaction);
 
             /** Reaction id. */
-            public id: (number|Long);
+            public id: (number|Long)
 
             /** Reaction author. */
-            public author: string;
+            public author: string
 
             /** Reaction emoji. */
-            public emoji: string;
+            public emoji: string
 
             /** Reaction action. */
-            public action: signalservice.DataMessage.Reaction.Action;
+            public action: signalservice.DataMessage.Reaction.Action
 
             /**
              * Creates a new Reaction instance using the specified properties.
@@ -1291,16 +1291,16 @@ export namespace signalservice {
             constructor(properties?: signalservice.DataMessage.IQuote);
 
             /** Quote id. */
-            public id: (number|Long);
+            public id: (number|Long)
 
             /** Quote author. */
-            public author: string;
+            public author: string
 
             /** Quote text. */
-            public text: string;
+            public text: string
 
             /** Quote attachments. */
-            public attachments: signalservice.DataMessage.Quote.IQuotedAttachment[];
+            public attachments: signalservice.DataMessage.Quote.IQuotedAttachment[]
 
             /**
              * Creates a new Quote instance using the specified properties.
@@ -1405,13 +1405,13 @@ export namespace signalservice {
                 constructor(properties?: signalservice.DataMessage.Quote.IQuotedAttachment);
 
                 /** QuotedAttachment contentType. */
-                public contentType: string;
+                public contentType: string
 
                 /** QuotedAttachment fileName. */
-                public fileName: string;
+                public fileName: string
 
                 /** QuotedAttachment thumbnail. */
-                public thumbnail?: (signalservice.IAttachmentPointer|null);
+                public thumbnail?: (signalservice.IAttachmentPointer|null)
 
                 /**
                  * Creates a new QuotedAttachment instance using the specified properties.
@@ -1515,13 +1515,13 @@ export namespace signalservice {
             constructor(properties?: signalservice.DataMessage.IPreview);
 
             /** Preview url. */
-            public url: string;
+            public url: string
 
             /** Preview title. */
-            public title: string;
+            public title: string
 
             /** Preview image. */
-            public image?: (signalservice.IAttachmentPointer|null);
+            public image?: (signalservice.IAttachmentPointer|null)
 
             /**
              * Creates a new Preview instance using the specified properties.
@@ -1621,10 +1621,10 @@ export namespace signalservice {
             constructor(properties?: signalservice.DataMessage.ILokiProfile);
 
             /** LokiProfile displayName. */
-            public displayName: string;
+            public displayName: string
 
             /** LokiProfile profilePicture. */
-            public profilePicture: string;
+            public profilePicture: string
 
             /**
              * Creates a new LokiProfile instance using the specified properties.
@@ -1724,10 +1724,10 @@ export namespace signalservice {
             constructor(properties?: signalservice.DataMessage.IOpenGroupInvitation);
 
             /** OpenGroupInvitation url. */
-            public url: string;
+            public url: string
 
             /** OpenGroupInvitation name. */
-            public name: string;
+            public name: string
 
             /**
              * Creates a new OpenGroupInvitation instance using the specified properties.
@@ -1845,28 +1845,28 @@ export namespace signalservice {
             constructor(properties?: signalservice.DataMessage.IClosedGroupControlMessage);
 
             /** ClosedGroupControlMessage type. */
-            public type: signalservice.DataMessage.ClosedGroupControlMessage.Type;
+            public type: signalservice.DataMessage.ClosedGroupControlMessage.Type
 
             /** ClosedGroupControlMessage publicKey. */
-            public publicKey: Uint8Array;
+            public publicKey: Uint8Array
 
             /** ClosedGroupControlMessage name. */
-            public name: string;
+            public name: string
 
             /** ClosedGroupControlMessage encryptionKeyPair. */
-            public encryptionKeyPair?: (signalservice.IKeyPair|null);
+            public encryptionKeyPair?: (signalservice.IKeyPair|null)
 
             /** ClosedGroupControlMessage members. */
-            public members: Uint8Array[];
+            public members: Uint8Array[]
 
             /** ClosedGroupControlMessage admins. */
-            public admins: Uint8Array[];
+            public admins: Uint8Array[]
 
             /** ClosedGroupControlMessage wrappers. */
-            public wrappers: signalservice.DataMessage.ClosedGroupControlMessage.IKeyPairWrapper[];
+            public wrappers: signalservice.DataMessage.ClosedGroupControlMessage.IKeyPairWrapper[]
 
             /** ClosedGroupControlMessage expirationTimer. */
-            public expirationTimer: number;
+            public expirationTimer: number
 
             /**
              * Creates a new ClosedGroupControlMessage instance using the specified properties.
@@ -1979,10 +1979,10 @@ export namespace signalservice {
                 constructor(properties?: signalservice.DataMessage.ClosedGroupControlMessage.IKeyPairWrapper);
 
                 /** KeyPairWrapper publicKey. */
-                public publicKey: Uint8Array;
+                public publicKey: Uint8Array
 
                 /** KeyPairWrapper encryptedKeyPair. */
-                public encryptedKeyPair: Uint8Array;
+                public encryptedKeyPair: Uint8Array
 
                 /**
                  * Creates a new KeyPairWrapper instance using the specified properties.
@@ -2093,19 +2093,19 @@ export namespace signalservice {
         constructor(properties?: signalservice.ICallMessage);
 
         /** CallMessage type. */
-        public type: signalservice.CallMessage.Type;
+        public type: signalservice.CallMessage.Type
 
         /** CallMessage sdps. */
-        public sdps: string[];
+        public sdps: string[]
 
         /** CallMessage sdpMLineIndexes. */
-        public sdpMLineIndexes: number[];
+        public sdpMLineIndexes: number[]
 
         /** CallMessage sdpMids. */
-        public sdpMids: string[];
+        public sdpMids: string[]
 
         /** CallMessage uuid. */
-        public uuid: string;
+        public uuid: string
 
         /**
          * Creates a new CallMessage instance using the specified properties.
@@ -2230,22 +2230,22 @@ export namespace signalservice {
         constructor(properties?: signalservice.IConfigurationMessage);
 
         /** ConfigurationMessage closedGroups. */
-        public closedGroups: signalservice.ConfigurationMessage.IClosedGroup[];
+        public closedGroups: signalservice.ConfigurationMessage.IClosedGroup[]
 
         /** ConfigurationMessage openGroups. */
-        public openGroups: string[];
+        public openGroups: string[]
 
         /** ConfigurationMessage displayName. */
-        public displayName: string;
+        public displayName: string
 
         /** ConfigurationMessage profilePicture. */
-        public profilePicture: string;
+        public profilePicture: string
 
         /** ConfigurationMessage profileKey. */
-        public profileKey: Uint8Array;
+        public profileKey: Uint8Array
 
         /** ConfigurationMessage contacts. */
-        public contacts: signalservice.ConfigurationMessage.IContact[];
+        public contacts: signalservice.ConfigurationMessage.IContact[]
 
         /**
          * Creates a new ConfigurationMessage instance using the specified properties.
@@ -2356,19 +2356,19 @@ export namespace signalservice {
             constructor(properties?: signalservice.ConfigurationMessage.IClosedGroup);
 
             /** ClosedGroup publicKey. */
-            public publicKey: Uint8Array;
+            public publicKey: Uint8Array
 
             /** ClosedGroup name. */
-            public name: string;
+            public name: string
 
             /** ClosedGroup encryptionKeyPair. */
-            public encryptionKeyPair?: (signalservice.IKeyPair|null);
+            public encryptionKeyPair?: (signalservice.IKeyPair|null)
 
             /** ClosedGroup members. */
-            public members: Uint8Array[];
+            public members: Uint8Array[]
 
             /** ClosedGroup admins. */
-            public admins: Uint8Array[];
+            public admins: Uint8Array[]
 
             /**
              * Creates a new ClosedGroup instance using the specified properties.
@@ -2483,25 +2483,25 @@ export namespace signalservice {
             constructor(properties?: signalservice.ConfigurationMessage.IContact);
 
             /** Contact publicKey. */
-            public publicKey: Uint8Array;
+            public publicKey: Uint8Array
 
             /** Contact name. */
-            public name: string;
+            public name: string
 
             /** Contact profilePicture. */
-            public profilePicture: string;
+            public profilePicture: string
 
             /** Contact profileKey. */
-            public profileKey: Uint8Array;
+            public profileKey: Uint8Array
 
             /** Contact isApproved. */
-            public isApproved: boolean;
+            public isApproved: boolean
 
             /** Contact isBlocked. */
-            public isBlocked: boolean;
+            public isBlocked: boolean
 
             /** Contact didApproveMe. */
-            public didApproveMe: boolean;
+            public didApproveMe: boolean
 
             /**
              * Creates a new Contact instance using the specified properties.
@@ -2602,10 +2602,10 @@ export namespace signalservice {
         constructor(properties?: signalservice.IReceiptMessage);
 
         /** ReceiptMessage type. */
-        public type: signalservice.ReceiptMessage.Type;
+        public type: signalservice.ReceiptMessage.Type
 
         /** ReceiptMessage timestamp. */
-        public timestamp: (number|Long)[];
+        public timestamp: (number|Long)[]
 
         /**
          * Creates a new ReceiptMessage instance using the specified properties.
@@ -2740,37 +2740,37 @@ export namespace signalservice {
         constructor(properties?: signalservice.IAttachmentPointer);
 
         /** AttachmentPointer id. */
-        public id: (number|Long);
+        public id: (number|Long)
 
         /** AttachmentPointer contentType. */
-        public contentType: string;
+        public contentType: string
 
         /** AttachmentPointer key. */
-        public key: Uint8Array;
+        public key: Uint8Array
 
         /** AttachmentPointer size. */
-        public size: number;
+        public size: number
 
         /** AttachmentPointer digest. */
-        public digest: Uint8Array;
+        public digest: Uint8Array
 
         /** AttachmentPointer fileName. */
-        public fileName: string;
+        public fileName: string
 
         /** AttachmentPointer flags. */
-        public flags: number;
+        public flags: number
 
         /** AttachmentPointer width. */
-        public width: number;
+        public width: number
 
         /** AttachmentPointer height. */
-        public height: number;
+        public height: number
 
         /** AttachmentPointer caption. */
-        public caption: string;
+        public caption: string
 
         /** AttachmentPointer url. */
-        public url: string;
+        public url: string
 
         /**
          * Creates a new AttachmentPointer instance using the specified properties.
@@ -2890,22 +2890,22 @@ export namespace signalservice {
         constructor(properties?: signalservice.IGroupContext);
 
         /** GroupContext id. */
-        public id: Uint8Array;
+        public id: Uint8Array
 
         /** GroupContext type. */
-        public type: signalservice.GroupContext.Type;
+        public type: signalservice.GroupContext.Type
 
         /** GroupContext name. */
-        public name: string;
+        public name: string
 
         /** GroupContext members. */
-        public members: string[];
+        public members: string[]
 
         /** GroupContext avatar. */
-        public avatar?: (signalservice.IAttachmentPointer|null);
+        public avatar?: (signalservice.IAttachmentPointer|null)
 
         /** GroupContext admins. */
-        public admins: string[];
+        public admins: string[]
 
         /**
          * Creates a new GroupContext instance using the specified properties.
@@ -3026,19 +3026,19 @@ export namespace signalservice {
         constructor(properties?: signalservice.IWebSocketRequestMessage);
 
         /** WebSocketRequestMessage verb. */
-        public verb: string;
+        public verb: string
 
         /** WebSocketRequestMessage path. */
-        public path: string;
+        public path: string
 
         /** WebSocketRequestMessage body. */
-        public body: Uint8Array;
+        public body: Uint8Array
 
         /** WebSocketRequestMessage headers. */
-        public headers: string[];
+        public headers: string[]
 
         /** WebSocketRequestMessage id. */
-        public id: (number|Long);
+        public id: (number|Long)
 
         /**
          * Creates a new WebSocketRequestMessage instance using the specified properties.
@@ -3138,10 +3138,10 @@ export namespace signalservice {
         constructor(properties?: signalservice.IWebSocketMessage);
 
         /** WebSocketMessage type. */
-        public type: signalservice.WebSocketMessage.Type;
+        public type: signalservice.WebSocketMessage.Type
 
         /** WebSocketMessage request. */
-        public request?: (signalservice.IWebSocketRequestMessage|null);
+        public request?: (signalservice.IWebSocketRequestMessage|null)
 
         /**
          * Creates a new WebSocketMessage instance using the specified properties.

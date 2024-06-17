@@ -4,7 +4,7 @@ import type { DeleteByHashesFromNodeParams, DeleteFromNodeSubRequest, NotEmptyAr
 import type { RequestStoreBody } from '@/network/request'
 import type { ResponseStore } from '@/network/response'
 import type { Swarm } from '@/types/swarm'
-import { isEmpty } from 'lodash'
+import _ from 'lodash'
 
 export async function storeMessage({ swarm, data64, destination, namespace, timestamp, ttl }: RequestStoreBody): Promise<ResponseStore> {
   const results = await storeOnNode(
@@ -54,7 +54,7 @@ function buildStoreRequests(
   params: Array<StoreOnNodeParams>,
   toDeleteOnSequence: DeleteByHashesFromNodeParams | null
 ): Array<StoreOnNodeSubRequest | DeleteFromNodeSubRequest> {
-  if (!toDeleteOnSequence || isEmpty(toDeleteOnSequence)) {
+  if (!toDeleteOnSequence || _.isEmpty(toDeleteOnSequence)) {
     return justStores(params)
   }
   return [...justStores(params), ...buildDeleteByHashesSubRequest(toDeleteOnSequence)]

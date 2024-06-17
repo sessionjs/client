@@ -3,7 +3,7 @@ import { addMessagePadding } from './message-padding'
 import { concatUInt8Array, hexToUint8Array, removePrefixIfNeeded } from '../utils'
 import sodium from 'libsodium-wrappers-sumo'
 import type { Keypair } from '../keypair'
-import { isNil, toNumber } from 'lodash'
+import _ from 'lodash'
 import { SnodeNamespaces } from '@/types/namespaces'
 import ByteBuffer from 'bytebuffer'
 import { SessionCryptoError, SessionCryptoErrorCode } from '@/errors/crypto'
@@ -146,7 +146,7 @@ export async function wrap(
     // right when we upgrade from not having namespaces stored in the outgoing cached messages our messages won't have a namespace associated.
     // So we need to keep doing the lookup of where they should go if the namespace is not set.
 
-    const overridenNamespace = !isNil(namespace)
+    const overridenNamespace = !_.isNil(namespace)
       ? namespace
       : isGroup
         ? SnodeNamespaces.ClosedGroupMessage
@@ -169,12 +169,12 @@ async function overwriteOutgoingTimestampWithNetworkTimestamp(message: { plainTe
   const contentDecoded = SignalService.Content.decode(plainTextBuffer)
 
   const { dataMessage, dataExtractionNotification, typingMessage } = contentDecoded
-  if (dataMessage && dataMessage.timestamp && toNumber(dataMessage.timestamp) > 0) {
+  if (dataMessage && dataMessage.timestamp && _.toNumber(dataMessage.timestamp) > 0) {
     // this is a sync message, do not overwrite the message timestamp
     if (dataMessage.syncTarget) {
       return {
         overRiddenTimestampBuffer: plainTextBuffer,
-        networkTimestamp: toNumber(dataMessage.timestamp),
+        networkTimestamp: _.toNumber(dataMessage.timestamp),
       }
     }
     dataMessage.timestamp = networkTimestamp
@@ -182,11 +182,11 @@ async function overwriteOutgoingTimestampWithNetworkTimestamp(message: { plainTe
   if (
     dataExtractionNotification &&
     dataExtractionNotification.timestamp &&
-    toNumber(dataExtractionNotification.timestamp) > 0
+    _.toNumber(dataExtractionNotification.timestamp) > 0
   ) {
     dataExtractionNotification.timestamp = networkTimestamp
   }
-  if (typingMessage && typingMessage.timestamp && toNumber(typingMessage.timestamp) > 0) {
+  if (typingMessage && typingMessage.timestamp && _.toNumber(typingMessage.timestamp) > 0) {
     typingMessage.timestamp = networkTimestamp
   }
   const overRiddenTimestampBuffer = SignalService.Content.encode(contentDecoded).finish()

@@ -1,7 +1,7 @@
 // CREDIT: OXEN, Session-Desktop
 // github.com/oxen-io/session-desktop
 
-import { last, orderBy } from 'lodash'
+import _ from 'lodash'
 import type { PickEnum } from './enums'
 
 export enum SnodeNamespaces {
@@ -108,8 +108,8 @@ function maxSizeMap(namespaces: Array<SnodeNamespaces>) {
     groupedByPriorities.find(p => p.priority === item.priority)?.namespaces.push(item.namespace)
   })
 
-  const sortedDescPriorities = orderBy(groupedByPriorities, ['priority'], ['desc'])
-  const lowestPriority = last(sortedDescPriorities)?.priority || 1
+  const sortedDescPriorities = _.orderBy(groupedByPriorities, ['priority'], ['desc'])
+  const lowestPriority = _.last(sortedDescPriorities)?.priority || 1
   const sizeMap = sortedDescPriorities.flatMap(m => {
     const paddingForLowerPriority = m.priority === lowestPriority ? 0 : 1
     const splitsForPriority = paddingForLowerPriority + m.namespaces.length

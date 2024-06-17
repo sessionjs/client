@@ -8,7 +8,7 @@ import { SnodeNamespace, SnodeNamespaces } from '@/types/namespaces'
 import type { Snode } from '@/types/snode'
 import type { RequestNamespace, RetrieveMessageItem, RetrieveMessagesResultsBatched, RetrieveMessagesResultsContent } from '@/types/snode-retrieve'
 import type { Swarm } from '@/types/swarm'
-import { isArray, omit } from 'lodash'
+import _ from 'lodash'
 
 export async function poll({ swarm, namespaces }: RequestPollBody): Promise<ResponsePoll> {
   if (namespaces.length === 0) {
@@ -51,7 +51,7 @@ export async function retrieveNextMessages(
     doSnodeBatchRequest(retrieveRequestsParams, targetNode, timeOutMs)
 
   const results = await Promise.race([timeoutPromise(), fetchPromise()])
-  if (!results || !isArray(results) || !results.length) {
+  if (!results || !_.isArray(results) || !results.length) {
     throw new SessionFetchError({ code: SessionFetchErrorCode.FetchFailed, message: `Could not connect to ${targetNode.public_ip}:${targetNode.storage_port}` })
   }
 
@@ -98,7 +98,7 @@ async function buildRetrieveRequest(
         }
         const retrieveParamsLegacy: RetrieveLegacyClosedGroupSubRequestType = {
           method: 'retrieve',
-          params: omit(retrieveLegacyClosedGroup, 'timestamp'), // if we give a timestamp, a signature will be required by the service node, and we don't want to provide one as this is an unauthenticated namespace
+          params: _.omit(retrieveLegacyClosedGroup, 'timestamp'), // if we give a timestamp, a signature will be required by the service node, and we don't want to provide one as this is an unauthenticated namespace
         }
 
         return retrieveParamsLegacy

@@ -1,7 +1,7 @@
 // CREDIT: OXEN, Session-Desktop
 // github.com/oxen-io/session-desktop
 
-import { isArray } from 'lodash'
+import _ from 'lodash'
 import { snodeRpc } from './session-rpc'
 import {
   MAX_SUBREQUESTS_COUNT,
@@ -89,7 +89,7 @@ function decodeBatchRequest(snodeResponse: SnodeResponse): NotEmptyArrayOfBatchR
   }
   const parsed = JSON.parse(snodeResponse.body)
 
-  if (!isArray(parsed.results)) {
+  if (!_.isArray(parsed.results)) {
     throw new SessionRuntimeError({ 
       code: SessionRuntimeErrorCode.Generic,
       message: 'decodeBatchRequest results is not an array'

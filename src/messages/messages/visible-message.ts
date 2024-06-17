@@ -2,7 +2,7 @@
 // github.com/oxen-io/session-desktop
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isEmpty } from 'lodash'
+import _ from 'lodash'
 import { SignalService } from '@/signal-service'
 import { ExpirableMessage, type ExpirableMessageParams } from '../expirable-message'
 import type { LokiProfile } from '../signal-message'
@@ -204,9 +204,9 @@ export function buildProfileForOutgoingMessage(params: { lokiProfile?: LokiProfi
   // no need to include the avatarPointer if there is no profileKey associated with it.
   const avatarPointer =
     params.lokiProfile?.avatarPointer &&
-    !isEmpty(profileKey) &&
+    !_.isEmpty(profileKey) &&
     params.lokiProfile.avatarPointer &&
-    !isEmpty(params.lokiProfile.avatarPointer)
+    !_.isEmpty(params.lokiProfile.avatarPointer)
       ? params.lokiProfile.avatarPointer
       : undefined
 

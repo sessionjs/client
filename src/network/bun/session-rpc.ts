@@ -1,5 +1,5 @@
 import https from 'https'
-import { clone } from 'lodash'
+import _ from 'lodash'
 import type { Snode } from '@/types/snode'
 import type { SnodeResponse } from './batch-request'
 import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
@@ -32,7 +32,7 @@ export async function snodeRpc(
   const body = {
     jsonrpc: '2.0',
     method,
-    params: clone(params),
+    params: _.clone(params),
   }
 
   const fetchOptions: LokiFetchOptions = {
