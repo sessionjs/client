@@ -277,13 +277,26 @@ export class Session {
       onMessagesReceived: (messages) => {
         const dataMessages = messages
           .filter(m => m.content.dataMessage)
-          .filter(m => typeof m.content.dataMessage?.syncTarget !== 'string')
+          .filter(m => !m.content.dataMessage?.syncTarget)
         this.events.get('message')?.forEach(cb => {
           dataMessages.forEach(m => cb(signalMessageToMessage(m)))
         })
       },
-      updateLastHashes: (hashes) => {
-        this.storage.set(StorageKeys.LastHashes, JSON.stringify(hashes))
+      updateLastHashes: async (hashes) => {
+        const lastHashes = await this.storage.get(StorageKeys.LastHashes)
+        let newLastHashes = hashes
+        if (lastHashes !== null) {
+          newLastHashes = JSON.parse(lastHashes) as typeof hashes
+        }
+        hashes.forEach(h => {
+          const existing = newLastHashes.find(lh => lh.namespace === h.namespace)
+          if (existing) {
+            existing.lastHash = h.lastHash
+          } else {
+            newLastHashes.push(h)
+          }
+        })
+        this.storage.set(StorageKeys.LastHashes, JSON.stringify(newLastHashes))
       },
       storage: this.storage,
       onSwarmConnectionFailed: (swarm: Swarm) => {

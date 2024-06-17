@@ -221,7 +221,9 @@ export class Poller {
       .filter(m => m !== undefined) as { hash: string, envelope: EnvelopePlus, content: SignalService.Content }[]
 
 
-    updateLastHashes(newLastHashes)
+    if (newLastHashes.length > 0) {
+      updateLastHashes(newLastHashes)
+    }
     onMessagesReceived(dataMessagesDecrypted)
 
     return dataMessagesDecrypted
