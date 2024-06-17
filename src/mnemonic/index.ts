@@ -1,5 +1,5 @@
 import { SessionValidationError, SessionValidationErrorCode } from '../errors/validation'
-import englishWords from './english.json'
+import englishWords from './dictionaries/english'
 import { crc32 } from './utils'
 
 export enum MnemonicWordset {

@@ -1,6 +1,6 @@
 {
   "name": "session-oxen",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "homepage": "https://github.com/VityaSchel/session.js",
   "license": "MIT",
@@ -38,7 +38,6 @@
   },
   "files": [
     "dist/**/*.js",
-    "dist/**/*.json",
     "dist/**/*.d.ts",
     "README.md"
   ],
