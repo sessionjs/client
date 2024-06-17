@@ -298,3 +298,7 @@ const mnemonic = encode(generateSeedHex())
 ### Session client constants
 
 You can use some Session client constatnts from `session-oxen/consts` such as `CONVERSATION.MAX_VOICE_MESSAGE_DURATION` which should help you define limits for your client
+
+## Funding
+
+You can donate in crypto here: [hloth.dev/donate]

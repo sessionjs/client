@@ -1,11 +1,11 @@
 {
   "name": "session-oxen",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "type": "module",
   "homepage": "https://github.com/VityaSchel/session.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json && cp src/signal-service/compiled.js dist/signal-service/compiled.js && cp src/signal-service/compiled.d.ts dist/signal-service/compiled.d.ts",
+    "build": "tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json --resolve-full-paths && cp src/signal-service/compiled.js dist/signal-service/compiled.js && cp src/signal-service/compiled.d.ts dist/signal-service/compiled.d.ts",
     "protobuf": "pbjs --target static-module --wrap es6 --out src/signal-service/compiled.js src/signal-service/signalservice.proto && pbts --out src/signal-service/compiled.d.ts src/signal-service/compiled.js --force-long"
   },
   "main": "dist/index.js",
