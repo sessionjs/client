@@ -199,13 +199,33 @@ You can use any of existing storage adapters or write your own
 Simply **do not provide any storage to `storage` option in Session class constructor** and this will be the default. You can optionally provide it as: 
 ```ts
 import { Session } from 'session-oxen'
-import { InMemoryStorage } from 'session-oxen'
+import { InMemoryStorage } from 'session-oxen/storage'
 
-new Session({ storage: InMemoryStorage })
+new Session({ storage: new InMemoryStorage() })
 ```
 
 </td>
 </tr>
+
+<tr>
+<td>Persistant with `fs`</td>
+<td>Simple storage that stores everything in memory and periodically syncs it with locally stored file in key=value format. `filePath` is optional and defaults to `./storage.db` </td>
+<td>
+
+```ts
+import { Session } from 'session-oxen'
+import { PersistantKeyvalStorage } from 'session-oxen/storage'
+
+new Session({ 
+  storage: new PersistantKeyvalStorage({ 
+    filePath: 'some-file-path.db' 
+  })
+})
+```
+
+</td>
+</tr>
+
 </table>
 
 To implement your own storage, write class that implements Storage interface from `session-oxen/storage`. Take a look at this example with in-memory storage

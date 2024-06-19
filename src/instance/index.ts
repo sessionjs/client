@@ -21,7 +21,7 @@ import pRetry from 'p-retry'
 import type { Swarm } from '@/types/swarm'
 import { Poller } from '@/polling'
 import type { EventCallback, EventName } from './events'
-import { signalMessageToMessage } from '@/messages'
+import { signalMessageToMessage, type Message } from '@/messages'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
 
@@ -39,8 +39,8 @@ export class Session {
   public isAuthorized: boolean = false
 
   constructor(options?: {
-    storage: Storage
-    network: Network
+    storage?: Storage
+    network?: Network
   }) {
     if (options?.storage) {
       checkStorage(options?.storage)
@@ -274,12 +274,20 @@ export class Session {
     if (!(poller instanceof Poller)) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidPoller, message: 'Poller must be an instance of Poller' })
     this.pollers.add(poller)
     poller._attachedToInstance(this, {
-      onMessagesReceived: (messages) => {
+      onMessagesReceived: async (messages) => {
         const dataMessages = messages
           .filter(m => m.content.dataMessage)
           .filter(m => !m.content.dataMessage?.syncTarget)
+        const newDataMessages: Message[] = []
+        for (const m of dataMessages) {
+          if(!await this.storage.has(m.hash)) {
+            const { _content, _envelope, ...message } = signalMessageToMessage(m)
+            await this.storage.set('message_hash:' + m.hash, JSON.stringify(message))
+            newDataMessages.push({ ...message, _content, _envelope })
+          }
+        }
         this.events.get('message')?.forEach(cb => {
-          dataMessages.forEach(m => cb(signalMessageToMessage(m)))
+          newDataMessages.forEach(m => cb(m))
         })
       },
       updateLastHashes: async (hashes) => {

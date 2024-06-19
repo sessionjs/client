@@ -67,6 +67,7 @@ export class Poller {
     if(!this.instance.isAuthorized) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Polling can\'t be started without user' })
     if (this.polling === false) {
       this.polling = true
+      this.poll()
       this.intervalId = setInterval(() => this.poll(), this.interval)
     }
   }
