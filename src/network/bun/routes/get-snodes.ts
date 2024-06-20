@@ -1,6 +1,6 @@
 import type { Snode } from '@/types/snode'
 import { seeds } from '../seeds'
-import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
+import { SessionFetchError, SessionFetchErrorCode } from '@session.js/errors'
 import type { ResponseGetSnodes } from '@/network/response'
 
 export async function getSnodes(): Promise<ResponseGetSnodes> {

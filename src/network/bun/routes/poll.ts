@@ -1,5 +1,5 @@
-import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
-import { SessionValidationError, SessionValidationErrorCode } from '@/errors/validation'
+import { SessionFetchError, SessionFetchErrorCode } from '@session.js/errors'
+import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
 import { doSnodeBatchRequest } from '@/network/bun/batch-request'
 import type { RetrieveLegacyClosedGroupSubRequestType, RetrieveSubRequestType } from '@/network/bun/snode-request-types'
 import type { RequestPollBody } from '@/network/request'

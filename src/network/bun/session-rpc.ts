@@ -2,7 +2,7 @@ import https from 'https'
 import _ from 'lodash'
 import type { Snode } from '@/types/snode'
 import type { SnodeResponse } from './batch-request'
-import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
+import { SessionFetchError, SessionFetchErrorCode } from '@session.js/errors'
 
 export const ERROR_421_HANDLED_RETRY_REQUEST = '421 handled. Retry this request with a new snode.'
 

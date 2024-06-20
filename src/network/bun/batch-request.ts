@@ -9,8 +9,8 @@ import {
   type SnodeApiSubRequests,
 } from './snode-request-types'
 import type { Snode } from '@/types/snode'
-import { SessionRuntimeError, SessionRuntimeErrorCode } from '@/errors/runtime'
-import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
+import { SessionRuntimeError, SessionRuntimeErrorCode } from '@session.js/errors'
+import { SessionFetchError, SessionFetchErrorCode } from '@session.js/errors'
 
 /**
  * When sending a request over onion, we might get two status.

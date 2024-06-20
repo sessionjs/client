@@ -1,6 +1,6 @@
 # Session.js
 
-Session.js (`session-oxen`) is a JavaScript library to use [Session messenger by OXEN](https://getsession.org) programmatically. Can be used entirely on server or in browser with server proxy. Includes TypeScript definitions. Tests with bun:test.
+Session.js is a JavaScript library to use [Session messenger by OXEN](https://getsession.org) programmatically. Can be used entirely on server or in browser with server proxy. Includes TypeScript definitions. Tests with bun:test.
 
 Written with blazingly fast [Bun](bun.sh), a modern runtime for JavaScript and alternative to Node.js. **This package cannot be used with Node.js, it uses a better runtime instead of it**
 
@@ -8,6 +8,20 @@ Use cases:
 - Session bots (hundreds of bots in single process)
 - Custom Session clients (web and native with JS)
 - Automation tools for Session
+
+- [Session.js](#sessionjs)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Quick start](#quick-start)
+    - [Sending messages](#sending-messages)
+    - [Polling messages](#polling-messages)
+    - [Events](#events)
+  - [Storage](#storage)
+  - [Error handling](#error-handling)
+  - [Collection of useful utils](#collection-of-useful-utils)
+    - [Mnemonic decoding and encoding](#mnemonic-decoding-and-encoding)
+    - [Session client constants](#session-client-constants)
+  - [Funding](#funding)
 
 ## Features
 
@@ -59,7 +73,7 @@ Use cases:
     - [X] Display name
     - [ ] Avatar
     - [ ] Some sort of profile save request to the network?
-  - [ ] ONS resolving
+  - [X] ONS resolving
 
 </details>
 
@@ -69,15 +83,14 @@ By using this software, you are agreeing to abide by [Terms of use](./TERMS.md).
 
 1. First install bun: https://bun.sh/
 2. Create a new Bun project in any directory, using `bun init` or manually
-3. Install session.js: `bun install session-oxen`
+3. Install session.js: `bun install @session.js/client`
 
 ## Quick start
 
 ### Sending messages
 
 ```ts
-import { Session } from 'session-oxen'
-import { ready } from 'session-oxen/sodium'
+import { Session, ready } from '@session.js/client'
 await ready
 
 const mnemonic = 'love love love love love love love love love love love love love'
@@ -96,11 +109,8 @@ console.log('Sent message with id', hash)
 By default, if you don't provide `interval` in options to Poller class constructor, it will poll new messages each 3 seconds.
 
 ```ts
-import { Session } from 'session-oxen'
-import { Poller } from 'session-oxen/polling'
-import { SnodeNamespaces } from 'session-oxen/types'
-import { Message } from 'session-oxen/messages'
-import { ready } from 'session-oxen/sodium'
+import { Session, Poller, ready } from '@session.js/client'
+import { SnodeNamespaces, type Message } from '@session.js/client/types'
 await ready
 
 const mnemonic = 'love love love love love love love love love love love love love'
@@ -127,9 +137,7 @@ session.on('message', (msg: Message) => {
 You can even attach multiple pollers to instance, for example, to configure interval of polling different namespaces:
 
 ```ts
-import { Session } from 'session-oxen'
-import { Poller } from 'session-oxen/polling'
-import { ready } from 'session-oxen/sodium'
+import { Session, Poller, ready } from '@session.js/client'
 await ready
 
 const mnemonic = 'love love love love love love love love love love love love love'
@@ -175,7 +183,7 @@ session.off('message', onMessage)
 
 Always make sure to await for initialization of libsodium:
 ```ts
-import { ready } from 'session-oxen/sodium'
+import { ready } from '@session.js/client'
 await ready
 // ...
 ```
@@ -198,8 +206,8 @@ You can use any of existing storage adapters or write your own
 
 Simply **do not provide any storage to `storage` option in Session class constructor** and this will be the default. You can optionally provide it as: 
 ```ts
-import { Session } from 'session-oxen'
-import { InMemoryStorage } from 'session-oxen/storage'
+import { Session } from '@session.js/client'
+import { InMemoryStorage } from '@session.js/client/storage'
 
 new Session({ storage: new InMemoryStorage() })
 ```
@@ -213,8 +221,8 @@ new Session({ storage: new InMemoryStorage() })
 <td>
 
 ```ts
-import { Session } from 'session-oxen'
-import { PersistantKeyvalStorage } from 'session-oxen/storage'
+import { Session } from '@session.js/client'
+import { PersistantKeyvalStorage } from '@session.js/client/storage'
 
 new Session({ 
   storage: new PersistantKeyvalStorage({ 
@@ -228,10 +236,10 @@ new Session({
 
 </table>
 
-To implement your own storage, write class that implements Storage interface from `session-oxen/storage`. Take a look at this example with in-memory storage
+To implement your own storage, write class that implements Storage interface from `@session.js/client/storage`. Take a look at this example with in-memory storage
 
 ```ts
-import type { Storage } from 'session-oxen/storage'
+import type { Storage } from '@session.js/client/storage'
 
 export class MyInMemoryStorage implements Storage {
   storage: Map<string, string> = new Map()
@@ -256,10 +264,14 @@ export class MyInMemoryStorage implements Storage {
 
 ## Error handling
 
-Session.js validates and handles a lot of errors for you, wrapping them in special different classes, so you can easily handle them on your abstract level. For example:
+Session.js validates and handles a lot of errors for you, wrapping them in special different classes, so you can easily handle them on your abstract level. 
+
+You must install [@session.js/errors](https://www.npmjs.com/package/@session.js/errors)
+
+Example:
 
 ```ts
-import { SessionValidationError, SessionValidationErrorCode } from 'session-oxen/errors'
+import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
 
 const session = new Session()
 
@@ -282,43 +294,55 @@ try {
 
 ### Mnemonic decoding and encoding
 
-Use `session-oxen/mnemonic`:
+Use [@session.js/mnemonic](https://www.npmjs.com/package/@session.js/mnemonic):
 
 ```ts
-import { encode, decode, MnemonicWordset } from 'session-oxen/mnemonic'
+import { encode, decode, MnemonicWordset } from '@session.js/mnemonic'
 
 const seed = decode('love love love love love love love love love love love love')
 const mnemonic = encode(seed)
 ```
 
-You can even add your own mnemonic languages:
+### Generate random Session ID
 
-```ts
-import { decode, mnemonicLanguages, addMnemonicLanguage } from 'session-oxen/mnemonic'
-
-mnemonicLanguages.russian = addMnemonicLanguage({
-  prefixLen: 3,
-  words: [/* ... */]
-})
-decode('love love love love love love love love love love love love', 'russian')
-```
-
-In order to generate random mnemonic:
+Install [@session.js/mnemonic](https://www.npmjs.com/package/@session.js/mnemonic) and [@session.js/keypair](https://www.npmjs.com/package/@session.js/keypair)
 
 1. Use `generateSeedHex`
 2. Use `encode` to encode seed to mnemonic
 
-```ts
-import { encode } from 'session-oxen/mnemonic'
-import { generateSeedHex } from 'session-oxen/keypair'
+> Hint: Session IDs are [x25519 aka Curve25519](https://en.wikipedia.org/wiki/Curve25519) public keys prepended with `05`
 
-const mnemonic = encode(generateSeedHex())
+```ts
+import { generateSeedHex, getKeypairFromSeed } from '@session.js/keypair'
+import { encode } from '@session.js/mnemonic'
+
+const seedHex = generateSeedHex()
+const keypair = getKeypairFromSeed(seedHex)
+const mnemonic = encode(seedHex)
+const sessionID = keypair.x25519.publicKey
+
+console.log('Generated session ID:', sessionID)
+console.log('Mnemonic for it:', mnemonic)
+```
+
+### Add your own mnemonic language
+
+To see this and other cool examples, go to [@session.js/mnemonic](https://www.npmjs.com/package/@session.js/mnemonic) readme.
+
+### ONS resolving
+
+Use [@session.js/ons](https://www.npmjs.com/package/@session.js/ons):
+
+```ts
+import { resolve } from '@session.js/mnemonic'
+
+await resolve('hloth') // => 057aeb66e45660c3bdfb7c62706f6440226af43ec13f3b6f899c1dd4db1b8fce5b
 ```
 
 ### Session client constants
 
-You can use some Session client constatnts from `session-oxen/consts` such as `CONVERSATION.MAX_VOICE_MESSAGE_DURATION` which should help you define limits for your client
+You can use some Session client constatnts from `@session.js/consts` such as `CONVERSATION.MAX_VOICE_MESSAGE_DURATION` which should help you define limits for your client
 
 ## Funding
 
-You can donate in crypto here: [hloth.dev/donate]
+You can donate here: [hloth.dev/donate]

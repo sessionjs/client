@@ -1,4 +1,4 @@
-import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
+import { SessionFetchError, SessionFetchErrorCode } from '@session.js/errors'
 import { doSnodeBatchRequest } from '@/network/bun/batch-request'
 import type { DeleteByHashesFromNodeParams, DeleteFromNodeSubRequest, NotEmptyArrayOfBatchResults, StoreOnNodeParams, StoreOnNodeSubRequest } from '@/network/bun/snode-request-types'
 import type { RequestStoreBody } from '@/network/request'

@@ -1,8 +1,15 @@
 {
-  "name": "session-oxen",
-  "version": "0.0.16",
+  "name": "@session.js/client",
+  "version": "0.0.17",
   "type": "module",
-  "homepage": "https://github.com/VityaSchel/session.js",
+  "homepage": "https://github.com/sessionjs/client",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sessionjs/client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sessionjs/client/issues"
+  },
   "license": "MIT",
   "scripts": {
     "build": "tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json --resolve-full-paths && cp src/signal-service/compiled.js dist/signal-service/compiled.js && cp src/signal-service/compiled.d.ts dist/signal-service/compiled.d.ts",
@@ -13,12 +20,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./polling": "./dist/polling/index.js",
-    "./sodium": "./dist/sodium/index.js",
-    "./storage": "./dist/storage/index.js",
-    "./errors": "./dist/errors/index.js",
-    "./mnemonic": "./dist/mnemonic/index.js",
-    "./keypair": "./dist/keypair/index.js",
-    "./consts": "./dist/consts/index.js"
+    "./storage": "./dist/storage/index.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
@@ -42,14 +44,18 @@
     "README.md"
   ],
   "dependencies": {
+    "@session.js/consts": "1.0.2",
+    "@session.js/errors": "^1.0.0",
+    "@session.js/keypair": "^1.0.0",
+    "@session.js/mnemonic": "^1.0.0",
     "bytebuffer": "^5.0.1",
     "crc": "^4.3.2",
     "libsodium-wrappers-sumo": "^0.7.13",
     "lodash": "^4.17.21",
     "p-retry": "^6.2.0",
+    "protobufjs": "^7.3.0",
     "uuid": "^9.0.1",
-    "zod": "^3.23.8",
-    "protobufjs": "^7.3.0"
+    "zod": "^3.23.8"
   },
   "trustedDependencies": [
     "protobufjs"

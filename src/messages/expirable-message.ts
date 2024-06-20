@@ -2,7 +2,7 @@
 // github.com/oxen-io/session-desktop
 
 import { SignalService } from '@/signal-service'
-import { DURATION, TTL_DEFAULT } from '@/consts'
+import { DURATION, TTL_DEFAULT } from '@session.js/consts'
 import type { DisappearingMessageType } from '@/types/disappearing-message'
 import { ContentMessage, type MessageParams } from './signal-message'
 

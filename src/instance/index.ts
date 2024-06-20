@@ -1,11 +1,11 @@
 import { InMemoryStorage, StorageKeys, type Storage } from '@/storage'
 import type { Network } from '@/network'
 import { checkStorage } from '../storage/utils'
-import { SessionValidationError, SessionValidationErrorCode } from '../errors/validation'
-import { decode } from '../mnemonic'
-import { getKeypairFromSeed, type Keypair } from '../keypair'
+import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
+import { decode } from '@session.js/mnemonic'
+import { getKeypairFromSeed, type Keypair } from '@session.js/keypair'
 import { Uint8ArrayToHex, isHex } from '../utils'
-import { SessionRuntimeError, SessionRuntimeErrorCode } from '../errors/runtime'
+import { SessionRuntimeError, SessionRuntimeErrorCode } from '@session.js/errors'
 import { wrap, type EncryptAndWrapMessageResults } from '../crypto/message-encrypt'
 import { VisibleMessage } from '@/messages/messages/visible-message'
 import { v4 as uuid } from 'uuid'
@@ -16,7 +16,7 @@ import { BunNetwork } from '@/network/bun'
 import type { ResponseGetSnodes, ResponseGetSwarms, ResponseStore } from '@/network/response'
 import type { Snode } from '@/types/snode'
 import _ from 'lodash'
-import { SessionFetchError, SessionFetchErrorCode } from '@/errors/fetch'
+import { SessionFetchError, SessionFetchErrorCode } from '@session.js/errors'
 import pRetry from 'p-retry'
 import type { Swarm } from '@/types/swarm'
 import { Poller } from '@/polling'
@@ -264,10 +264,6 @@ export class Session {
       this.snodes = snodes
     }
     return this.snodes
-  }
-
-  async resolveONS() {
-    
   }
 
   addPoller(poller: Poller) {
