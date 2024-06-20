@@ -345,4 +345,4 @@ You can use some Session client constatnts from `@session.js/consts` such as `CO
 
 ## Funding
 
-You can donate here: [hloth.dev/donate]
+You can donate here: [hloth.dev/donate](https://hloth.dev/donate)
