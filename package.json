@@ -1,6 +1,6 @@
 {
   "name": "@session.js/client",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "type": "module",
   "homepage": "https://github.com/sessionjs/client",
   "repository": {
@@ -16,12 +16,12 @@
     "protobuf": "pbjs --target static-module --wrap es6 --out src/signal-service/compiled.js src/signal-service/signalservice.proto && pbts --out src/signal-service/compiled.d.ts src/signal-service/compiled.js --force-long"
   },
   "main": "dist/index.js",
-  "types": "types/index.d.ts",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
     "./polling": "./dist/polling/index.js",
     "./storage": "./dist/storage/index.js",
-    "./types/*": "./dist/types/*/*.js"
+    "./types/": "./dist/types/"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
