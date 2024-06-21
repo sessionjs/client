@@ -1,6 +1,6 @@
 {
   "name": "@session.js/client",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "type": "module",
   "homepage": "https://github.com/sessionjs/client",
   "repository": {
@@ -21,7 +21,7 @@
     ".": "./dist/index.js",
     "./polling": "./dist/polling/index.js",
     "./storage": "./dist/storage/index.js",
-    "./types/": "./dist/types/"
+    "./types": "./dist/types/index.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
