@@ -1,7 +1,7 @@
 import { Session } from '@/index'
 import { Poller } from '@/polling'
-import { encode } from '@/mnemonic'
-import { generateSeedHex } from '@/keypair'
+import { encode } from '@session.js/mnemonic'
+import { generateSeedHex } from '@session.js/keypair'
 import { ready } from '@/sodium'
 await ready
 

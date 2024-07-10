@@ -18,3 +18,8 @@ export type ResponseGetSwarms = {
 export type ResponsePoll = {
   messages: { namespace: SnodeNamespaces, messages: RetrieveMessageItem[] }[]
 }
+
+export type ResponseUploadAttachment = {
+  url: string
+  id: number
+}

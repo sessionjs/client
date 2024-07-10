@@ -104,6 +104,44 @@ const { messageHash, syncMessageHash } = await session.sendMessage({
 console.log('Sent message with id', hash)
 ```
 
+### Sending images
+
+```ts
+import { Session, ready } from '@session.js/client'
+await ready
+
+const mnemonic = 'love love love love love love love love love love love love love'
+
+const session = new Session()
+session.setMnemonic(mnemonic)
+const buffer = await fetch('https://picsum.photos/100/100').then(res => res.arrayBuffer())
+const file = new File([buffer], 'image.jpg', { type: 'image/jpeg' })
+await session.sendMessage({ 
+  to: '05123798d4f76752d0055a04a554977760bc0716fd7a256498a4209b657bc72273', 
+  text: 'Image downloaded by URL:', 
+  attachments: [file] 
+})
+```
+```ts
+import path from 'path'
+import fs from 'fs/promises'
+import { Session, ready } from '@session.js/client'
+await ready
+
+const mnemonic = 'love love love love love love love love love love love love love'
+
+const session = new Session()
+session.setMnemonic(mnemonic)
+const filename = '/Users/kitty/Desktop/image.jpg'
+const buffer = await fs.readFile(filename)
+const file = new File([buffer], path.basename(filename), { type: 'image/jpeg' })
+await session.sendMessage({
+  to: '05123b5cbd8f5ef8927480dfb8338a62d478e68754b2df739babd3c9099ae15439', 
+  text: 'Image from file:', 
+  attachments: [file] 
+})
+```
+
 ### Polling messages
 
 By default, if you don't provide `interval` in options to Poller class constructor, it will poll new messages each 3 seconds.

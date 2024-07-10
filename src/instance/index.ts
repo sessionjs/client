@@ -7,13 +7,13 @@ import { getKeypairFromSeed, type Keypair } from '@session.js/keypair'
 import { Uint8ArrayToHex, isHex } from '../utils'
 import { SessionRuntimeError, SessionRuntimeErrorCode } from '@session.js/errors'
 import { wrap, type EncryptAndWrapMessageResults } from '../crypto/message-encrypt'
-import { VisibleMessage } from '@/messages/messages/visible-message'
+import { VisibleMessage, type AttachmentPointerWithUrl } from '@/messages/messages/visible-message'
 import { v4 as uuid } from 'uuid'
 import { toRawMessage, type RawMessage } from '@/messages/signal-message'
 import { SnodeNamespaces } from '@/types/namespaces'
-import { RequestType, type RequestGetSwarmsBody, type RequestStoreBody } from '@/network/request'
+import { RequestType, type RequestUploadAttachment, type RequestGetSwarmsBody, type RequestStoreBody } from '@/network/request'
 import { BunNetwork } from '@/network/bun'
-import type { ResponseGetSnodes, ResponseGetSwarms, ResponseStore } from '@/network/response'
+import type { ResponseGetSnodes, ResponseGetSwarms, ResponseStore, ResponseUploadAttachment } from '@/network/response'
 import type { Snode } from '@/types/snode'
 import _ from 'lodash'
 import { SessionFetchError, SessionFetchErrorCode } from '@session.js/errors'
@@ -22,6 +22,8 @@ import type { Swarm } from '@/types/swarm'
 import { Poller } from '@/polling'
 import type { EventCallback, EventName } from './events'
 import { signalMessageToMessage, type Message } from '@/messages'
+import { MAX_ATTACHMENT_FILESIZE_BYTES } from 'dist/consts'
+import { encryptFileAttachment } from '@/attachments/encrypt'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
 
@@ -97,15 +99,36 @@ export class Session {
    * Sends message to other Session ID
    * Might throw SessionFetchError if there is a connection issue
    * @param to — Session ID of the recipient
+   * @param attachments — Array of instances of File bytes to send with the message
    * @returns `Promise<{ messageHash: string, syncMessageHash: string }>` — hashes (identifiers) of the messages sent (visible and sync message_
    */
-  public async sendMessage({ to, text }: {
+  public async sendMessage({ to, text, attachments }: {
     to: string,
     text?: string,
+    attachments?: File[]
   }): Promise<{ messageHash: string, syncMessageHash: string }> {
     if(!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
     if(to.length !== 66) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidSessionID, message: 'Invalid session ID length' })
     if (!to.startsWith('05') || !isHex(to)) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidSessionID, message: 'Session ID must be a hex string starting from 05' })
+    if (attachments?.some(a => !(a instanceof File))) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidAttachment, message: 'Attachments must be instances of File' })
+    if (attachments?.some(a => a.size > MAX_ATTACHMENT_FILESIZE_BYTES)) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidAttachment, message: 'Attachment size exceeds the limit: ' + MAX_ATTACHMENT_FILESIZE_BYTES + ' bytes' })
+
+    const attachmentsPointers: AttachmentPointerWithUrl[] = []
+    if(attachments) {
+      for(const attachment of attachments ?? []) {
+        const encrypted = await encryptFileAttachment(attachment)
+        const uploaded = await this.request<ResponseUploadAttachment, RequestUploadAttachment>({ type: RequestType.UploadAttachment, body: { data: encrypted.ciphertext } })
+        attachmentsPointers.push({
+          contentType: attachment.type,
+          id: uploaded.id,
+          url: uploaded.url,
+          size: attachment.size,
+          key: encrypted.key,
+          digest: new Uint8Array(encrypted.digest),
+          fileName: attachment.name
+        })
+      }
+    }
 
     const timestamp = this.getNowWithNetworkOffset()
     const msg = new VisibleMessage({
@@ -119,7 +142,7 @@ export class Session {
       expirationType: 'unknown',
       expireTimer: 0,
       identifier: uuid(),
-      attachments: [],
+      attachments: attachmentsPointers,
       preview: [],
       quote: undefined
     })
