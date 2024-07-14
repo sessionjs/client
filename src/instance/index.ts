@@ -22,7 +22,7 @@ import type { Swarm } from '@/types/swarm'
 import { Poller } from '@/polling'
 import type { EventCallback, EventName } from './events'
 import { signalMessageToMessage, type Message } from '@/messages'
-import { MAX_ATTACHMENT_FILESIZE_BYTES } from 'dist/consts'
+import { MAX_ATTACHMENT_FILESIZE_BYTES } from '@session.js/consts'
 import { encryptFileAttachment } from '@/attachments/encrypt'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g

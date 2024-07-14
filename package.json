@@ -1,6 +1,6 @@
 {
   "name": "@session.js/client",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "type": "module",
   "homepage": "https://github.com/sessionjs/client",
   "repository": {
@@ -50,7 +50,6 @@
     "@session.js/keypair": "1.0.1",
     "@session.js/mnemonic": "1.0.1",
     "bytebuffer": "^5.0.1",
-    "crc": "^4.3.2",
     "libsodium-wrappers-sumo": "^0.7.13",
     "lodash": "^4.17.21",
     "p-retry": "^6.2.0",
