@@ -1,3 +1,3 @@
 export { Session } from './instance'
 export { Poller } from './polling'
-export { ready } from './sodium'
+export { ready } from './initializers'

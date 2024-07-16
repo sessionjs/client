@@ -1,6 +1,6 @@
 {
   "name": "@session.js/client",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "type": "module",
   "homepage": "https://github.com/sessionjs/client",
   "repository": {
@@ -12,8 +12,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json --resolve-full-paths && cp src/signal-service/compiled.js dist/signal-service/compiled.js && cp src/signal-service/compiled.d.ts dist/signal-service/compiled.d.ts",
-    "protobuf": "pbjs --target static-module --wrap es6 --out src/signal-service/compiled.js src/signal-service/signalservice.proto && pbts --out src/signal-service/compiled.d.ts src/signal-service/compiled.js --force-long"
+    "build": "tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json --resolve-full-paths"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,7 +31,6 @@
     "@types/uuid": "^9.0.8",
     "eslint": "9.x",
     "globals": "^15.4.0",
-    "protobufjs-cli": "^1.1.2",
     "tsc-alias": "^1.8.10",
     "typescript-eslint": "^7.12.0"
   },
@@ -45,10 +43,12 @@
     "README.md"
   ],
   "dependencies": {
-    "@session.js/consts": "1.0.2",
-    "@session.js/errors": "1.0.1",
-    "@session.js/keypair": "1.0.1",
-    "@session.js/mnemonic": "1.0.1",
+    "@session.js/bun-network": "^1.0.2",
+    "@session.js/consts": "^1.0.3",
+    "@session.js/errors": "^1.0.9",
+    "@session.js/keypair": "^1.0.2",
+    "@session.js/mnemonic": "^1.0.3",
+    "@session.js/types": "^1.0.3",
     "bytebuffer": "^5.0.1",
     "libsodium-wrappers-sumo": "^0.7.13",
     "lodash": "^4.17.21",
@@ -56,8 +56,5 @@
     "protobufjs": "^7.3.0",
     "uuid": "^9.0.1",
     "zod": "^3.23.8"
-  },
-  "trustedDependencies": [
-    "protobufjs"
-  ]
+  }
 }

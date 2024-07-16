@@ -1,10 +1,10 @@
-import { SignalService } from '../signal-service'
+import { SignalService } from '../../../types/src/signal-bindings'
 import { addMessagePadding } from './message-padding'
 import { concatUInt8Array, hexToUint8Array, removePrefixIfNeeded } from '../utils'
 import sodium from 'libsodium-wrappers-sumo'
 import type { Keypair } from '@session.js/keypair'
 import _ from 'lodash'
-import { SnodeNamespaces } from '@/types/namespaces'
+import { SnodeNamespaces } from '@session.js/types/namespaces'
 import ByteBuffer from 'bytebuffer'
 import { SessionCryptoError, SessionCryptoErrorCode } from '@session.js/errors'
 

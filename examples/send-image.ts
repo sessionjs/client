@@ -1,7 +1,6 @@
-import { Session } from '@/index'
+import { Session, ready } from '@/index'
 import { encode } from '@session.js/mnemonic'
 import { generateSeedHex } from '@session.js/keypair'
-import { ready } from '@/sodium'
 await ready
 
 // Edit `input_your_session_id_here` below to your session ID and run this script to receive nice image!

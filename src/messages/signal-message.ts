@@ -1,8 +1,8 @@
 // CREDIT: OXEN, Session-Desktop
 // github.com/oxen-io/session-desktop
 
-import { SignalService } from '../signal-service'
-import { SnodeNamespaces } from '../types/namespaces'
+import { SignalService } from '../../../types/src/signal-bindings'
+import { SnodeNamespaces } from '@session.js/types/namespaces'
 import { v4 as uuid } from 'uuid'
 
 export type LokiProfile = {

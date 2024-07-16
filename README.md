@@ -26,7 +26,7 @@ Use cases:
 ## Features
 
 - On-demand polling — you decide when to get new messages and whether instance should poll them (and poll settings like frequency) or work just for sending
-- Per-instance storage settings — you can attach sqlite storage to instance or use in-memory storage (default)
+- Per-instance storage and network settings — you can attach sqlite storage to instance or use in-memory storage (default)
 - Session.js can be used partially in browser to generate signatures and encrypted data clientside to send it to your proxy server. See this in action with [Session Web client](https://github.com/VityaSchel/session-web)!
 
 <details>
@@ -41,9 +41,9 @@ Use cases:
     - [X] Messages types
       - [X] Regular chat message
         - [X] Text
-        - [ ] Attachments
-          - [ ] Images
-          - [ ] Files
+        - [X] Attachments
+          - [X] Images
+          - [X] Files
           - [ ] Voice messages
           - [ ] Quotes
           - [ ] Web links previews
@@ -74,6 +74,7 @@ Use cases:
     - [ ] Avatar
     - [ ] Some sort of profile save request to the network?
   - [X] ONS resolving
+  - [ ] Get rid of ByteBuffer and other lazy dependencies
 
 </details>
 
@@ -104,7 +105,7 @@ const { messageHash, syncMessageHash } = await session.sendMessage({
 console.log('Sent message with id', hash)
 ```
 
-### Sending images
+### Sending images or files
 
 ```ts
 import { Session, ready } from '@session.js/client'
@@ -148,7 +149,7 @@ By default, if you don't provide `interval` in options to Poller class construct
 
 ```ts
 import { Session, Poller, ready } from '@session.js/client'
-import { SnodeNamespaces, type Message } from '@session.js/client/types'
+import { SnodeNamespaces, type Message } from '@session.js/types'
 await ready
 
 const mnemonic = 'love love love love love love love love love love love love love'
@@ -231,7 +232,7 @@ More examples are in [./examples directory](./examples/)
 
 ## Storage
 
-You can use any of existing storage adapters or write your own
+You can use any existing storage adapter or write your own (see below)
 
 <table>
 <tr>
@@ -254,16 +255,16 @@ new Session({ storage: new InMemoryStorage() })
 </tr>
 
 <tr>
-<td>Persistant with `fs`</td>
+<td>Persistant file-based key=value storage with `fs`</td>
 <td>Simple storage that stores everything in memory and periodically syncs it with locally stored file in key=value format. `filePath` is optional and defaults to `./storage.db` </td>
 <td>
 
 ```ts
 import { Session } from '@session.js/client'
-import { PersistantKeyvalStorage } from '@session.js/client/storage'
+import { FileKeyvalStorage } from '@session.js/file-keyval-storage'
 
 new Session({ 
-  storage: new PersistantKeyvalStorage({ 
+  storage: new FileKeyvalStorage({ 
     filePath: 'some-file-path.db' 
   })
 })
@@ -274,10 +275,10 @@ new Session({
 
 </table>
 
-To implement your own storage, write class that implements Storage interface from `@session.js/client/storage`. Take a look at this example with in-memory storage
+To implement your own storage, write class that implements Storage interface from `@session.js/types/storage`. Take a look at this example with in-memory storage
 
 ```ts
-import type { Storage } from '@session.js/client/storage'
+import type { Storage } from '@session.js/types'
 
 export class MyInMemoryStorage implements Storage {
   storage: Map<string, string> = new Map()
@@ -296,6 +297,115 @@ export class MyInMemoryStorage implements Storage {
 
   has(key: string) {
     return this.storage.has(key)
+  }
+}
+```
+
+## Network
+
+You can pick existing network connector or write your own (see below)
+
+<table>
+<tr>
+<td> Network type </td> <td> Supports onion routing </td> <td> Description </td> <td> How to use </td>
+</tr>
+<tr>
+<td>Bun (local)</td>
+<td>❌</td>
+<td> This network type is default and simpliest. It is intended to be used in the same process that @session.js/client instances run in. It's ideal if you just want to start and doing everything on server in one project without browser or other parts. </td>
+<td>
+
+Simply **do not provide any network to `network` option in Session class constructor** and this will be the default. You can optionally provide it as: 
+```ts
+import { Session } from '@session.js/client'
+import { BunNetwork } from '@session.js/bun-network'
+
+new Session({ network: new BunNetwork() })
+```
+
+</td>
+</tr>
+
+<tr>
+<td>Bun (remote) for proxies</td>
+<td>❌</td>
+<td> This network might be useful if you're building client in environment that does not allow you sending requests to Session nodes with self-signed certificates. This option is ideal for browser clients, because it handles all network connection on backend proxy that forwards client-side encrypted data to snodes. Check out simple [browser example here](https://github.com/sessionjs/examples). </td>
+<td>
+
+Start by installing `@session.js/bun-network-remote` both on client-side and server-side. The package itself only does validation and connects client-side and server-side and all network management happens in dependency `@session.js/bun-network` just like in local case.
+
+Client-side (where Session client runs):
+
+```ts
+import { Session } from '@session.js/client'
+import { BunNetworkRemoteClient } from '@session.js/bun-network-remote'
+
+new Session({ 
+  network: new BunNetworkRemoteClient({ 
+    proxy: 'https://my-proxy.example.org:12345/' 
+    // this endpoint must be accessible in your environment
+    // i.e. if you're building Session client in browser, make sure
+    // that my-proxy.example.org has a valid SSL certificate, CORS and SSL settings
+  })
+})
+```
+
+Client-side part will send POST requests to this URL with FormData body.
+
+Server-side (proxy server):
+
+```ts
+// Runtime must be Bun.sh
+// Web server can be anything: Express, Fastify, Elysia, Bun's web server, etc...
+// Validation is done internally and throws @session.js/error RuntimeValidation errors
+
+import { Elysia } from 'elysia'
+import { BunNetworkRemoteServer } from '@session.js/bun-network-remote'
+const network = new BunNetworkRemoteServer()
+
+new Elysia()
+  .post('/', ({ body }) => network.onRequest(body))
+  .listen(12345)
+```
+
+</td>
+</tr>
+
+</table>
+
+To implement your own network, write class that implements Network interface from `@session.js/types/network` with onRequest method. It must cover all RequestTypes from `@session.js/types/network/request`. Take a look at this example:
+
+```ts
+import type { Network } from '@session.js/types'
+import { 
+  RequestType, 
+  type RequestGetSwarmsBody, 
+  type RequestPollBody, 
+  type RequestStoreBody, 
+  type RequestUploadAttachment 
+} from '@session.js/types/network/request'
+
+export class MyNetwork implements Network {
+  onRequest(type: RequestType, body: object): Promise<object> {
+    switch(type) {
+      case RequestType.Store:
+        return // typeof ResponseStore
+
+      case RequestType.GetSnodes:
+        return // typeof ResponseGetSnodes
+
+      case RequestType.GetSwarms:
+        return // typeof ResponseGetSwarms
+
+      case RequestType.Poll:
+        return // typeof ResponsePoll
+
+      case RequestType.UploadAttachment:
+        return // typeof ResponseUploadAttachment
+
+      default:
+        throw new Error('Invalid request type')
+    }
   }
 }
 ```
@@ -327,6 +437,13 @@ try {
   }
 }
 ```
+
+## Examples repository
+
+If you need more examples, go ahead and take a look at [examples repository](https://github.com/sessionjs/examples).
+
+- [Simple example](https://github.com/sessionjs/examples/tree/main/simple)
+- [Browser](https://github.com/sessionjs/examples/tree/main/browser-simple)
 
 ## Collection of useful utils
 

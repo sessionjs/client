@@ -1,29 +1,71 @@
-import { InMemoryStorage, StorageKeys, type Storage } from '@/storage'
-import type { Network } from '@/network'
-import { checkStorage } from '../storage/utils'
-import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
-import { decode } from '@session.js/mnemonic'
-import { getKeypairFromSeed, type Keypair } from '@session.js/keypair'
-import { Uint8ArrayToHex, isHex } from '../utils'
-import { SessionRuntimeError, SessionRuntimeErrorCode } from '@session.js/errors'
-import { wrap, type EncryptAndWrapMessageResults } from '../crypto/message-encrypt'
-import { VisibleMessage, type AttachmentPointerWithUrl } from '@/messages/messages/visible-message'
-import { v4 as uuid } from 'uuid'
-import { toRawMessage, type RawMessage } from '@/messages/signal-message'
-import { SnodeNamespaces } from '@/types/namespaces'
-import { RequestType, type RequestUploadAttachment, type RequestGetSwarmsBody, type RequestStoreBody } from '@/network/request'
-import { BunNetwork } from '@/network/bun'
-import type { ResponseGetSnodes, ResponseGetSwarms, ResponseStore, ResponseUploadAttachment } from '@/network/response'
-import type { Snode } from '@/types/snode'
 import _ from 'lodash'
-import { SessionFetchError, SessionFetchErrorCode } from '@session.js/errors'
 import pRetry from 'p-retry'
-import type { Swarm } from '@/types/swarm'
+import { v4 as uuid } from 'uuid'
+
+import { StorageKeys } from '@session.js/types/storage'
+import { InMemoryStorage } from '@/storage'
+import {
+  type Storage,
+  type Network,
+  SnodeNamespaces,
+} from '@session.js/types'
+import {
+  SessionValidationError,
+  SessionValidationErrorCode,
+  SessionFetchError,
+  SessionFetchErrorCode,
+  SessionRuntimeError,
+  SessionRuntimeErrorCode
+} from '@session.js/errors'
+
+import { decode } from '@session.js/mnemonic'
+import {
+  getKeypairFromSeed,
+  type Keypair
+} from '@session.js/keypair'
+
+import {
+  RequestType,
+  type RequestUploadAttachment,
+  type RequestGetSwarmsBody,
+  type RequestStoreBody
+} from '@session.js/types/network/request'
+import type {
+  ResponseGetSnodes,
+  ResponseGetSwarms,
+  ResponseStore,
+  ResponseUploadAttachment
+} from '@session.js/types/network/response'
+
+import type { Snode } from '@session.js/types/snode'
+import type { Swarm } from '@session.js/types/swarm'
+
+import {
+  checkStorage,
+  Uint8ArrayToHex,
+  checkNetwork,
+  isHex
+} from '@/utils'
+
+import { wrap, type EncryptAndWrapMessageResults } from '../crypto/message-encrypt'
+
+import {
+  VisibleMessage,
+  type AttachmentPointerWithUrl
+} from '@/messages/messages/visible-message'
+
 import { Poller } from '@/polling'
+
+import {
+  signalMessageToMessage,
+  type Message
+} from '@/messages'
+
+import { toRawMessage, type RawMessage } from '@/messages/signal-message'
 import type { EventCallback, EventName } from './events'
-import { signalMessageToMessage, type Message } from '@/messages'
 import { MAX_ATTACHMENT_FILESIZE_BYTES } from '@session.js/consts'
 import { encryptFileAttachment } from '@/attachments/encrypt'
+import { bunNetworkModule } from '@/initializers'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
 
@@ -47,9 +89,17 @@ export class Session {
     if (options?.storage) {
       checkStorage(options?.storage)
     }
-    // todo: same with network
 
-    this.network = options?.network ?? new BunNetwork()
+    if (options?.network) {
+      checkNetwork(options.network)
+      this.network = options.network
+    } else {
+      if (typeof Bun !== 'undefined') {
+        this.network = new bunNetworkModule.BunNetwork()
+      } else {
+        throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.NetworkNotProvided, message: 'You haven\'t provided @session.js/client compatible network, yet trying to use Session instance outside of Bun runtime. This will not work, you must either run this project with bun.sh or provide compatible Network and other modular instruments. Alternatively, if you just want to use utilities, take a look at packages like @session.js/ons, @session.js/keypair, @session.js/mnemonic and others that @session.js/client uses under the hood and that do not require Bun server runtime.' })
+      }
+    }
     this.storage = options?.storage ?? new InMemoryStorage()
   }
 

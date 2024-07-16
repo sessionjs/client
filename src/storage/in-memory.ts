@@ -1,4 +1,4 @@
-import type { Storage } from './index'
+import type { Storage } from '@session.js/types'
 
 export class InMemoryStorage implements Storage {
   storage: Map<string, string>

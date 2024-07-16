@@ -3,7 +3,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import _ from 'lodash'
-import { SignalService } from '@/signal-service'
+import { SignalService } from '@session.js/types/signal-bindings'
 import { ExpirableMessage, type ExpirableMessageParams } from '../expirable-message'
 import type { LokiProfile } from '../signal-message'
 import type { Reaction } from '@/reactions'

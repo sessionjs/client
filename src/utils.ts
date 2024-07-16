@@ -67,3 +67,40 @@ export function Uint8ArrayToBase64(uint8array: Uint8Array): string {
 export function base64ToUint8Array(string: string): Uint8Array {
   return new Uint8Array(ByteBuffer.wrap(string, 'base64').toArrayBuffer())
 }
+
+export class Deferred<T = void> {
+  promise: Promise<T>
+  resolve!: (value: T | PromiseLike<T>) => void
+  reject!: (reason?: T | PromiseLike<T>) => void
+  constructor() {
+    this.promise = new Promise<T>((resolve, reject) => {
+      this.resolve = resolve
+      this.reject = reject
+    })
+  }
+}
+
+export function checkStorage(storage: unknown) {
+  if (typeof storage !== 'object' || storage === null) {
+    throw new Error('Provided storage is invalid')
+  }
+  const storageObj = storage as { [key: string]: unknown };
+  ['get', 'set', 'delete', 'has'].forEach((method) => {
+    if (!(method in storageObj) || typeof storageObj[method] !== 'function') {
+      throw new Error(`Provided storage does not have method ${method}`)
+    }
+  })
+}
+
+export function checkNetwork(network: unknown) {
+  if (typeof network !== 'object' || network === null) {
+    throw new Error('Provided network is invalid')
+  }
+  
+  const storageObj = network as { [key: string]: unknown };
+  ['onRequest'].forEach((method) => {
+    if (!(method in storageObj) || typeof storageObj[method] !== 'function') {
+      throw new Error(`Provided network does not have method ${method}`)
+    }
+  })
+}

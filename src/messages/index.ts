@@ -1,5 +1,5 @@
-import { SignalService } from '@/signal-service'
-import type { EnvelopePlus } from '@/types/envelope'
+import { SignalService } from '@session.js/types/signal-bindings'
+import type { EnvelopePlus } from '@session.js/types/envelope'
 
 export function signalMessageToMessage({ hash, envelope, content }: {
   hash: string, 

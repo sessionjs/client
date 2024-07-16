@@ -1,4 +1,4 @@
-import type { SnodeSignatureResult } from '@/types/snode-signature-result'
+import type { SnodeSignatureResult } from '@session.js/types/snode-signature-result'
 import { Uint8ArrayToBase64, Uint8ArrayToHex } from '@/utils'
 import ByteBuffer from 'bytebuffer'
 import sodium, { type KeyPair } from 'libsodium-wrappers-sumo'
