@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json --resolve-full-paths"
+    "build": "rm -rf dist && tsc --project tsconfig.publish.json && tsc-alias -p tsconfig.publish.json --resolve-full-paths"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

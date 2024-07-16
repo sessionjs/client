@@ -1,4 +1,4 @@
-import { SignalService } from '../../../types/src/signal-bindings'
+import { SignalService } from '@session.js/types/signal-bindings'
 import { addMessagePadding } from './message-padding'
 import { concatUInt8Array, hexToUint8Array, removePrefixIfNeeded } from '../utils'
 import sodium from 'libsodium-wrappers-sumo'

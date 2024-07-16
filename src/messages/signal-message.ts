@@ -1,7 +1,7 @@
 // CREDIT: OXEN, Session-Desktop
 // github.com/oxen-io/session-desktop
 
-import { SignalService } from '../../../types/src/signal-bindings'
+import { SignalService } from '@session.js/types/signal-bindings'
 import { SnodeNamespaces } from '@session.js/types/namespaces'
 import { v4 as uuid } from 'uuid'
 

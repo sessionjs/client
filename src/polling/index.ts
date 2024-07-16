@@ -1,19 +1,23 @@
-import { decodeMessage, decryptMessage, extractContent } from '@/crypto/message-decrypt'
-import { getSnodeSignatureParams } from '@/crypto/signature'
-import { SessionFetchError, SessionFetchErrorCode } from '@session.js/errors'
-import { SessionRuntimeError, SessionRuntimeErrorCode } from '@session.js/errors'
-import { Session } from '@/instance'
-import type { Keypair } from '@session.js/keypair'
-import { RequestType, type RequestPollBody } from '@session.js/types/network/request'
-import type { ResponsePoll } from '@session.js/types/network/response'
-import { SignalService } from '@session.js/types/signal-bindings'
-import { StorageKeys, type Storage } from '@session.js/types/storage'
-import type { EnvelopePlus } from '@session.js/types/envelope'
-import { SnodeNamespace, SnodeNamespaces } from '@session.js/types/namespaces'
-import type { RequestNamespace } from '@session.js/types/snode-retrieve'
-import type { Swarm } from '@session.js/types/swarm'
 import _ from 'lodash'
 import { z } from 'zod'
+import { SignalService } from '@session.js/types/signal-bindings'
+import { StorageKeys, type Storage } from '@session.js/types/storage'
+import { 
+  SessionFetchError, 
+  SessionFetchErrorCode, 
+  SessionRuntimeError, 
+  SessionRuntimeErrorCode 
+} from '@session.js/errors'
+import { SnodeNamespace, SnodeNamespaces } from '@session.js/types/namespaces'
+import type { ResponsePoll } from '@session.js/types/network/response'
+import { RequestType, type RequestPollBody } from '@session.js/types/network/request'
+import type { EnvelopePlus } from '@session.js/types/envelope'
+import type { RequestNamespace } from '@session.js/types/snode-retrieve'
+import type { Swarm } from '@session.js/types/swarm'
+import type { Keypair } from '@session.js/keypair'
+import { decodeMessage, decryptMessage, extractContent } from '@/crypto/message-decrypt'
+import { getSnodeSignatureParams } from '@/crypto/signature'
+import type { Session } from '@/instance'
 
 // SnodeNamespaces.ClosedGroupMessage is legacy
 const allNamespaces = new Set([SnodeNamespaces.UserMessages, SnodeNamespaces.ConvoInfoVolatile, SnodeNamespaces.UserContacts, SnodeNamespaces.UserGroups, SnodeNamespaces.UserProfile])
