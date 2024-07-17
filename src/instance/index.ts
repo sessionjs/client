@@ -24,6 +24,7 @@ import { getOurSwarm, getSwarmsFor } from './swarms'
 import { addPoller } from './polling'
 import { getSnodes } from './snodes'
 import type { EventCallback, EventName } from './events'
+import { getFile } from '@/instance/get-file'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
 
@@ -90,16 +91,23 @@ export class Session {
     return this.keypair
   }
 
+  /** Advanced use. Returns current timestamp just like Date.now() but with network connection offset */
   getNowWithNetworkOffset() {
     return Date.now() // todo: replace with network timestamp
   }
 
+  /** Advanced use. Returns swarms for specified Session ID */
   getSwarmsFor = getSwarmsFor.bind(this)
+  /** Advanced use. Returns swarms that store messages for our Session ID */
   getOurSwarm = getOurSwarm.bind(this)
-
+  /** Advanced use. Returns Session nodes list */
   getSnodes = getSnodes.bind(this)
 
+  /** Add Poller class instance to this Session instance to start polling new messages */
   addPoller = addPoller.bind(this)
+
+  /** Download attachment received in message object. Returns File with decrypted content */
+  getFile = getFile.bind(this)
 
   /**
    * Sends message to other Session ID

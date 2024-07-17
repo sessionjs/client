@@ -55,12 +55,12 @@ Use cases:
     - [ ] Open groups (SOGS)
   - [X] Messages sending
     - [X] Data storing to swarms
-    - [ ] Messages types
-      - [ ] Regular chat message
+    - [X] Messages types
+      - [X] Regular chat message
         - [X] Text
-        - [ ] Attachments
-          - [ ] Images
-          - [ ] Files
+        - [X] Attachments
+          - [X] Images
+          - [X] Files
           - [ ] Voice messages
           - [ ] Quotes
           - [ ] Web links previews
@@ -167,9 +167,13 @@ session.on('message', (msg: Message) => {
     'Group id:', msg.type === 'group' ? msg.groupId : 'Not group',
     'Text:', msg.text ?? 'No text',
   )
-  // If you want to access more properties and experiment with them, use _envelope and _content
-  // msg._content = SignalService.Content <- useful message payload
-  // msg._envelope = EnvelopePlus <- message metadata
+
+  // If you want to access more properties and experiment with them, use getEnvelope and getContent
+  msg.getContent() // => SignalService.Content <- useful message payload
+  msg.getCnvelope() // => EnvelopePlus <- message metadata
+
+  // If you want to download attachments, use:
+  msg.attachments.forEach(async attachment => console.log(await session.getFile(attachment)))
 })
 ```
 

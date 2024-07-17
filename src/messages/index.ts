@@ -1,6 +1,42 @@
 import { SignalService } from '@session.js/types/signal-bindings'
 import type { EnvelopePlus } from '@session.js/types/envelope'
 
+export type PrivateMessage = {
+  type: 'private';
+}
+
+export type ClosedGroupMessage = {
+  type: 'group';
+  groupId: string
+}
+
+export type MessageAttachment = {
+  id: string,
+  caption?: string,
+  metadata: {
+    width?: number,
+    height?: number,
+    contentType?: string
+  },
+  /** Size of attached file in bytes */
+  size?: number,
+  /** Filename including extension */
+  name?: string
+  /** For internal decryption purposes */
+  _key?: Uint8Array
+  /** For internal decryption purposes */
+  _digest?: Uint8Array
+}
+
+export type Message = (PrivateMessage | ClosedGroupMessage) & {
+  id: string;
+  from: string;
+  text?: string;
+  attachments: MessageAttachment[];
+  getEnvelope: () => EnvelopePlus;
+  getContent: () => SignalService.Content;
+}
+
 export function signalMessageToMessage({ hash, envelope, content }: {
   hash: string, 
   envelope: EnvelopePlus, 
@@ -25,24 +61,24 @@ export function signalMessageToMessage({ hash, envelope, content }: {
     }),
     from,
     ...(typeof content.dataMessage?.body === 'string' && { text: content.dataMessage.body }),
-    _envelope: envelope,
-    _content: content
+    attachments: content.dataMessage?.attachments ? parseAttachments(content.dataMessage.attachments) : [],
+    getEnvelope: () => envelope,
+    getContent: () => content
   }
 }
 
-export type PrivateMessage = {
-  type: 'private';
-}
-
-export type ClosedGroupMessage = {
-  type: 'group';
-  groupId: string
-}
-
-export type Message = (PrivateMessage | ClosedGroupMessage) & {
-  id: string;
-  from: string;
-  text?: string;
-  _envelope: EnvelopePlus;
-  _content: SignalService.Content;
+export function parseAttachments(attachments: SignalService.IAttachmentPointer[]): Message['attachments'] {
+  return attachments.map(attachment => ({
+    id: attachment.id.toString(),
+    ...(attachment.caption && { caption: attachment.caption }),
+    metadata: {
+      ...(typeof attachment.width === 'number' && { width: attachment.width }),
+      ...(typeof attachment.height === 'number' && { height: attachment.height }),
+      ...(attachment.contentType && { contentType: attachment.contentType }),
+    },
+    ...(typeof attachment.size ==='number' && { size: attachment.size }),
+    ...(attachment.fileName && { name: attachment.fileName }),
+    ...(attachment.key && { _key: attachment.key }),
+    ...(attachment.digest && { _digest: attachment.digest })
+  }))
 }

@@ -22,4 +22,5 @@ session.on('message', message => {
     'Group id:', message.type === 'group' ? message.groupId : 'Not group',
     'Text:', message.text ?? 'No text',
   )
+  message.attachments.forEach(async attachment => console.log(await session.getFile(attachment)))
 })

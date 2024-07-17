@@ -1,3 +1,4 @@
+import { sign } from '@/crypto/signature'
 import { MAX_ATTACHMENT_FILESIZE_BYTES } from '@session.js/consts'
 import sodium from 'libsodium-wrappers-sumo'
 
@@ -92,14 +93,6 @@ async function encrypt(key: any, data: any, iv: any) {
 
 async function calculateMAC(key: any, data: any) {
   return sign(key, data)
-}
-
-async function sign(key: any, data: any) {
-  return crypto.subtle
-    .importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, false, ['sign'])
-    .then(async secondKey => {
-      return crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-256' }, secondKey, data)
-    })
 }
 
 async function calculateDigest(data: ArrayBuffer) {

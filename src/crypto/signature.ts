@@ -31,3 +31,11 @@ export function getSnodeSignatureParams(params: {
     pubkeyEd25519: Uint8ArrayToHex(params.ed25519Key.publicKey),
   }
 }
+
+export async function sign(key: any, data: any) {
+  return crypto.subtle
+    .importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, false, ['sign'])
+    .then(async secondKey => {
+      return crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-256' }, secondKey, data)
+    })
+}

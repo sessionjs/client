@@ -16,10 +16,10 @@ export function addPoller(this: Session, poller: Poller) {
         .filter(m => !m.content.dataMessage?.syncTarget)
       const newDataMessages: Message[] = []
       for (const m of dataMessages) {
-        if (!await this.storage.has(m.hash)) {
-          const { _content, _envelope, ...message } = signalMessageToMessage(m)
-          await this.storage.set('message_hash:' + m.hash, JSON.stringify(message))
-          newDataMessages.push({ ...message, _content, _envelope })
+        if (!await this.storage.has('message_hash:' + m.hash)) {
+          await this.storage.set('message_hash:' + m.hash, Date.now().toString())
+          const message = signalMessageToMessage(m)
+          newDataMessages.push(message)
         }
       }
       this.events.get('message')?.forEach(cb => {
