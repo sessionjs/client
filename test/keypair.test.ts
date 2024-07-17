@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test'
 import { decode } from '@session.js/mnemonic'
 import { getKeypairFromSeed } from '@session.js/keypair'
 import { Uint8ArrayToHex } from '@/utils'
-import { ready } from '@/sodium'
+import { ready } from '@/index'
 await ready
 
 const tests = [
