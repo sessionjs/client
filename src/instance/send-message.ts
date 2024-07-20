@@ -48,11 +48,7 @@ export async function sendMessage(this: Session, { to, text, attachments }: {
   const timestamp = this.getNowWithNetworkOffset()
   const msg = new VisibleMessage({
     body: text,
-    lokiProfile: {
-      displayName: this.displayName ?? `(${this.sessionID.slice(0, 3)}...${this.sessionID.slice(-3)})`,
-      avatarPointer: undefined,
-      profileKey: null//new Uint8Array(keypair.pubKey),
-    },
+    profile: this._getProfile(),
     timestamp: timestamp,
     expirationType: 'unknown',
     expireTimer: 0,
@@ -63,7 +59,7 @@ export async function sendMessage(this: Session, { to, text, attachments }: {
   })
   const syncMessage = new VisibleMessage({
     body: text,
-    lokiProfile: undefined,
+    profile: undefined,
     timestamp: timestamp,
     expirationType: 'unknown',
     expireTimer: 0,

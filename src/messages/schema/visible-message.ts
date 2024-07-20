@@ -1,12 +1,8 @@
-// CREDIT: OXEN, Session-Desktop
-// github.com/oxen-io/session-desktop
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import _ from 'lodash'
 import { SignalService } from '@session.js/types/signal-bindings'
 import { ExpirableMessage, type ExpirableMessageParams } from '../expirable-message'
-import type { LokiProfile } from '../signal-message'
+
 import type { Reaction } from '@/reactions'
+import { serializeProfile, type Profile } from '@/profile'
 
 interface AttachmentPointerCommon {
   contentType?: string;
@@ -68,7 +64,7 @@ export interface VisibleMessageParams extends ExpirableMessageParams {
   attachments?: Array<AttachmentPointerWithUrl>;
   body?: string;
   quote?: Quote;
-  lokiProfile?: LokiProfile;
+  profile?: Profile;
   preview?: Array<PreviewWithAttachmentUrl>;
   reaction?: Reaction;
   syncTarget?: string; // undefined means it is not a synced message
@@ -84,8 +80,6 @@ export class VisibleMessage extends ExpirableMessage {
   private readonly profile?: SignalService.DataMessage.ILokiProfile
   private readonly preview?: Array<PreviewWithAttachmentUrl>
 
-  /// In the case of a sync message, the public key of the person the message was targeted at.
-  /// - Note: `null or undefined` if this isn't a sync message.
   private readonly syncTarget?: string
 
   constructor(params: VisibleMessageParams) {
@@ -99,10 +93,11 @@ export class VisibleMessage extends ExpirableMessage {
     this.body = params.body
     this.quote = params.quote
 
-    const profile = buildProfileForOutgoingMessage(params)
-
-    this.profile = profile.lokiProfile
-    this.profileKey = profile.profileKey
+    if (params.profile) {
+      const profile = serializeProfile(params.profile)
+      this.profile = profile.lokiProfile
+      this.profileKey = profile.profileKey
+    }
 
     this.preview = params.preview
     this.reaction = params.reaction
@@ -158,7 +153,7 @@ export class VisibleMessage extends ExpirableMessage {
             quotedAttachment.fileName = attachment.fileName
           }
           if (attachment.thumbnail && (attachment.thumbnail as any).id) {
-            quotedAttachment.thumbnail = attachment.thumbnail as any // be sure to keep the typescript guard on id above
+            quotedAttachment.thumbnail = attachment.thumbnail as any
           }
 
           return quotedAttachment
@@ -188,44 +183,5 @@ export class VisibleMessage extends ExpirableMessage {
 
   public isEqual(comparator: VisibleMessage): boolean {
     return this.identifier === comparator.identifier && this.timestamp === comparator.timestamp
-  }
-}
-
-export function buildProfileForOutgoingMessage(params: { lokiProfile?: LokiProfile }) {
-  let profileKey: Uint8Array | undefined
-  if (params.lokiProfile && params.lokiProfile.profileKey) {
-    if (params.lokiProfile.profileKey instanceof Uint8Array) {
-      profileKey = new Uint8Array(params.lokiProfile.profileKey)
-    }
-  }
-
-  const displayName = params.lokiProfile?.displayName
-
-  // no need to include the avatarPointer if there is no profileKey associated with it.
-  const avatarPointer =
-    params.lokiProfile?.avatarPointer &&
-    !_.isEmpty(profileKey) &&
-    params.lokiProfile.avatarPointer &&
-    !_.isEmpty(params.lokiProfile.avatarPointer)
-      ? params.lokiProfile.avatarPointer
-      : undefined
-
-  let lokiProfile: SignalService.DataMessage.ILokiProfile | undefined
-  if (avatarPointer || displayName) {
-    lokiProfile = new SignalService.DataMessage.LokiProfile()
-
-    // we always need a profileKey tom decode an avatar pointer
-    if (avatarPointer && avatarPointer.length && profileKey) {
-      lokiProfile.profilePicture = avatarPointer
-    }
-
-    if (displayName) {
-      lokiProfile.displayName = displayName
-    }
-  }
-
-  return {
-    lokiProfile,
-    profileKey: lokiProfile?.profilePicture ? profileKey : undefined,
   }
 }

@@ -11,7 +11,8 @@ import {
   mapReceiptMessage,
   mapTypingMessage,
   mapScreenshotTakenMessage,
-  mapMediaSavedMessage
+  mapMediaSavedMessage,
+  mapMessageRequestResponseMessage
 } from '@/messages'
 
 export function addPoller(this: Session, poller: Poller) {
@@ -70,6 +71,11 @@ export function addPoller(this: Session, poller: Poller) {
         )
         .map(m => mapMediaSavedMessage(m))
         .forEach(m => this._emit('mediaSaved', m))
+
+      newMessages
+        .filter(m => m.content.messageRequestResponse)
+        .map(m => mapMessageRequestResponseMessage(m))
+        .forEach(m => this._emit('messageRequestApproved', m))
     },
     updateLastHashes: async (hashes) => {
       const lastHashes = await this.storage.get(StorageKeys.LastHashes)

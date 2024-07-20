@@ -1,3 +1,4 @@
+import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
 import ByteBuffer from 'bytebuffer'
 
 // 👇 Credit: https://stackoverflow.com/a/69585881 👇
@@ -82,25 +83,29 @@ export class Deferred<T = void> {
 
 export function checkStorage(storage: unknown) {
   if (typeof storage !== 'object' || storage === null) {
-    throw new Error('Provided storage is invalid')
+    throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidOptions, message: 'Provided storage is invalid' })
   }
   const storageObj = storage as { [key: string]: unknown };
   ['get', 'set', 'delete', 'has'].forEach((method) => {
     if (!(method in storageObj) || typeof storageObj[method] !== 'function') {
-      throw new Error(`Provided storage does not have method ${method}`)
+      throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidOptions, message: `Provided storage does not have method ${method}` })
     }
   })
 }
 
 export function checkNetwork(network: unknown) {
   if (typeof network !== 'object' || network === null) {
-    throw new Error('Provided network is invalid')
+    throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidOptions, message: 'Provided network is invalid' })
   }
   
   const storageObj = network as { [key: string]: unknown };
   ['onRequest'].forEach((method) => {
     if (!(method in storageObj) || typeof storageObj[method] !== 'function') {
-      throw new Error(`Provided network does not have method ${method}`)
+      throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidOptions, message: `Provided network does not have method ${method}` })
     }
   })
+}
+
+export function getPlaceholderDisplayName(sessionID: string): string {
+  return `(${sessionID.slice(0, 3)}...${sessionID.slice(-3)})`
 }

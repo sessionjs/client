@@ -1,5 +1,7 @@
 import { SignalService } from '@session.js/types/signal-bindings'
 import type { EnvelopePlus } from '@session.js/types/envelope'
+import { deserializeProfile, type Profile } from '@/profile'
+import { getPlaceholderDisplayName } from '@/utils'
 
 export type PrivateMessage = {
   type: 'private';
@@ -178,5 +180,19 @@ export function mapMediaSavedMessage({ content }: Content): MediaSavedNotificati
   }
   return {
     timestamp
+  }
+}
+
+export type MessageRequestResponse = {
+  profile: Profile
+}
+export function mapMessageRequestResponseMessage({ content, envelope }: Content): MessageRequestResponse {
+  const profile = deserializeProfile({
+    lokiProfile: content.messageRequestResponse!.profile,
+    profileKey: content.messageRequestResponse!.profileKey
+  })
+  profile.displayName ||= getPlaceholderDisplayName(envelope.source)
+  return {
+    profile
   }
 }

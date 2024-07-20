@@ -52,7 +52,7 @@ Use cases:
         - [ ] Configuration (SharedConfig) message
         - [X] Read message (ReadReceipt)
         - [X] Typing message
-        - [ ] Message request response
+        - [X] Message request response
         - [X] Screenshot / media saved (DataExtraction)
         - [X] Delete message (Unsend)
         - [ ] Call message
@@ -64,7 +64,7 @@ Use cases:
   - [ ] Messages editing (SOGS)
   - [X] Profile editing
     - [X] Display name
-    - [ ] Avatar
+    - [X] Avatar
     - [ ] Some sort of profile save request to the network?
   - [X] ONS resolving
   - [ ] Get rid of ByteBuffer and other lazy dependencies

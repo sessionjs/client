@@ -7,10 +7,10 @@ export async function decryptAttachment(data: ArrayBuffer, { size, keyBuffer, di
   digestBuffer: Uint8Array
 }) {
   if (keyBuffer.byteLength !== 64) {
-    throw new Error('Got invalid length attachment keys')
+    throw new SessionCryptoError({ code: SessionCryptoErrorCode.AttachmentDecryptionFailed, message: 'Got invalid length attachment keys' })
   }
   if (data.byteLength < 16 + 32) {
-    throw new Error('Got invalid length attachment')
+    throw new SessionCryptoError({ code: SessionCryptoErrorCode.AttachmentDecryptionFailed, message: 'Got invalid length attachment' })
   }
 
   const aesKey = keyBuffer.slice(0, 32)

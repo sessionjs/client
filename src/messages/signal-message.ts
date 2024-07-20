@@ -4,12 +4,7 @@
 import { SignalService } from '@session.js/types/signal-bindings'
 import { SnodeNamespaces } from '@session.js/types/namespaces'
 import { v4 as uuid } from 'uuid'
-
-export type LokiProfile = {
-  displayName: string;
-  avatarPointer?: string;
-  profileKey: Uint8Array | null;
-}
+import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
 
 export interface MessageParams {
   timestamp: number;
@@ -23,10 +18,10 @@ export abstract class SignalMessage {
   constructor({ timestamp, identifier }: MessageParams) {
     this.timestamp = timestamp
     if (identifier && identifier.length === 0) {
-      throw new Error('Cannot set empty identifier')
+      throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidOptions, message: 'Cannot set empty identifier' })
     }
     if (!timestamp) {
-      throw new Error('Cannot set undefined timestamp')
+      throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidOptions, message: 'Cannot set undefined timestamp' })
     }
     this.identifier = identifier || uuid()
   }

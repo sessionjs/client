@@ -1,5 +1,6 @@
 import { sign } from '@/crypto/signature'
 import { MAX_ATTACHMENT_FILESIZE_BYTES } from '@session.js/consts'
+import { SessionCryptoError, SessionCryptoErrorCode } from '@session.js/errors'
 import sodium from 'libsodium-wrappers-sumo'
 
 export async function encryptFileAttachment(file: File) {
@@ -58,10 +59,10 @@ export async function encryptAttachmentData(
   }
 
   if (keys.byteLength !== 64) {
-    throw new Error('Got invalid length attachment keys')
+    throw new SessionCryptoError({ code: SessionCryptoErrorCode.AttachmentEncryptionFailed, message: 'Got invalid length attachment keys' })
   }
   if (iv.byteLength !== 16) {
-    throw new Error('Got invalid length attachment iv')
+    throw new SessionCryptoError({ code: SessionCryptoErrorCode.AttachmentEncryptionFailed, message: 'Got invalid length attachment iv' })
   }
   const aesKey = keys.slice(0, 32)
   const macKey = keys.slice(32, 64)

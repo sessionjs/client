@@ -1,9 +1,7 @@
-import { checkStorage, checkNetwork } from '@/utils'
+import { checkStorage, checkNetwork, getPlaceholderDisplayName } from '@/utils'
 import type { Storage, Network } from '@session.js/types'
 
 import {
-  SessionValidationError,
-  SessionValidationErrorCode,
   SessionRuntimeError,
   SessionRuntimeErrorCode
 } from '@session.js/errors'
@@ -23,22 +21,25 @@ import { sendMessage } from './send-message'
 import { getOurSwarm, getSwarmsFor } from './swarms'
 import { addPoller } from './polling'
 import { getSnodes } from './snodes'
-import { getFile } from '@/instance/get-file'
-import { deleteMessage, deleteMessages } from '@/instance/delete-message'
-import { markMessagesAsRead } from '@/instance/mark-message-as-read'
-import { showTypingIndicator, hideTypingIndicator } from '@/instance/typing-indicator'
-import { notifyScreenshotTaken, notifyMediaSaved } from '@/instance/data-extraction-notification'
+import { getFile } from './get-file'
+import { deleteMessage, deleteMessages } from './delete-message'
+import { markMessagesAsRead } from './mark-message-as-read'
+import { showTypingIndicator, hideTypingIndicator } from './typing-indicator'
+import { notifyScreenshotTaken, notifyMediaSaved } from './data-extraction-notification'
+import { acceptConversationRequest } from './accept-conversation-request'
+import { setAvatar } from './set-avatar'
 
-import { _storeMessage } from '@/instance/store-message'
+import { _storeMessage } from './store-message'
 import type { EventCallback, EventName } from './events'
-
-export const forbiddenDisplayCharRegex = /\uFFD2*/g
+import { downloadAvatar, type Profile } from '@/profile'
+import { setDisplayName } from '@/instance/display-name'
 
 export class Session {
   protected mnemonic: string | undefined
   protected keypair: Keypair | undefined
   protected sessionID: string | undefined
   protected displayName: string | undefined
+  protected avatar: Profile['avatar']
   protected network: Network
   protected storage: Storage
   protected snodes: Snode[] | undefined
@@ -68,6 +69,15 @@ export class Session {
     this.storage = options?.storage ?? new InMemoryStorage()
   }
 
+  protected async _init() {
+    const savedAvatar = await this.storage.get('avatar')
+    if (savedAvatar !== null) {
+      const { key, url } = JSON.parse(savedAvatar) as { key: number[], url: string }
+      const profileKey = new Uint8Array(key)
+      this.avatar = { key: profileKey, url }
+    }
+  }
+
   /** Returns mnemonic of this instance or undefined, if you haven't set it with setMnemonic yet */
   public getMnemonic = getMnemonic.bind(this)
   /** Sets mnemonic for this instance, parses it to keypair. Throws SessionValidationError if mnemonic is invalid. Make sure you call this method only once, otherwise it will throw SessionRuntimeError */
@@ -83,14 +93,33 @@ export class Session {
   public getDisplayName(): string | undefined {
     return this.displayName
   }
-  /** Set display name of this instance */
-  public setDisplayName(displayName: string) {
-    if (displayName.length > 64 || displayName.length === 0) {
-      throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidDisplayName, message: 'Display name must be between 1 and 64 characters' })
-    } else {
-      this.displayName = displayName.replace(forbiddenDisplayCharRegex, '')
-    }
+  /** 
+   * Set display name of this instance by saving it locally and to network. 
+   * All unicode characters are accepted except for `ￒ` (0xffd2) which is reserved by Session for mentions. Max length: 64 characters
+   * Might throw SessionFetchError if there is a connection issue
+   * */
+  public setDisplayName = setDisplayName.bind(this)
+
+  /** 
+   * Get this instance's cached avatar.  Note that it doesn't fetch avatar from network, since avatar comes in a configuration message, so this method might return undefined
+   * If you're looking for a way to get other user's avatar, please make yourself familiar with "How Session profiles work" in the documentation
+   * If you're looking for a method to download and decrypt avatar's image, please use downloadAvatar
+   */
+  public getAvatar() {
+    return this.avatar
   }
+  /** 
+   * Set this instance's avatar by uploading it to file server and saving to network. It must be a valid image that can be displayed in most Session clients.
+   * Might throw SessionFetchError if there is a connection issue
+   */
+  public setAvatar = setAvatar.bind(this)
+  /**
+   * Download avatar using URL and key from Profile object. Returns decrypted ArrayBuffer with image data.
+   * Might throw SessionFetchError if there is a connection issue
+   * Might throw SessionValidationError if avatar's URL is not from Session file server
+   * @param avatar Avatar object from Profile's object with `url` and `key` properties
+   */
+  public downloadAvatar = downloadAvatar.bind(this)
 
   /** Returns Session.keypair of this instance. Returns undefined if you haven't initialized this instance with mnemonic yet. */
   getKeypair() {
@@ -178,6 +207,13 @@ export class Session {
    */
   public notifyMediaSaved = notifyMediaSaved.bind(this)
 
+  /**
+   * Accept conversation request from another Session ID
+   * Might throw SessionFetchError if there is a connection issue
+   * @param from Session ID of the sender of the conversation request
+   */
+  public acceptConversationRequest = acceptConversationRequest.bind(this)
+
   protected _storeMessage = _storeMessage.bind(this)
 
   async _request<Response, Body = any>({ type, body }: {
@@ -185,6 +221,13 @@ export class Session {
     body: Body
   }): Promise<Response> {
     return await this.network.onRequest(type, body) as Response
+  }
+
+  protected _getProfile() {
+    return {
+      displayName: this.displayName ?? getPlaceholderDisplayName(this.getSessionID()),
+      avatar: this.getAvatar(),
+    }
   }
 
   protected events: Map<EventName, EventCallback<EventName>[]> = new Map()
