@@ -76,6 +76,48 @@ export function addPoller(this: Session, poller: Poller) {
         .filter(m => m.content.messageRequestResponse)
         .map(m => mapMessageRequestResponseMessage(m))
         .forEach(m => this._emit('messageRequestApproved', m))
+
+      const configMessage = newMessages
+        .filter(m => m.content.configurationMessage)
+        .sort((a, b) => {
+          let aTimestamp = a.envelope.timestamp
+          let bTimestamp = b.envelope.timestamp
+          if(typeof aTimestamp !== 'number') {
+            aTimestamp = aTimestamp.toNumber()
+          }
+          if(typeof bTimestamp !== 'number') {
+            bTimestamp = bTimestamp.toNumber()
+          }
+          return bTimestamp - aTimestamp
+        }).at(-1)
+
+      if (configMessage) {
+        const syncedDisplayName = configMessage.content.configurationMessage?.displayName
+        console.log({ syncedDisplayName, current: this.displayName })
+        if (syncedDisplayName) {
+          if(this.displayName !== syncedDisplayName) {
+            this._emit('syncDisplayName', syncedDisplayName)
+          }
+          this.displayName = syncedDisplayName
+          this.storage.set(StorageKeys.DisplayName, syncedDisplayName)
+        }
+        const syncedProfileKey = configMessage.content.configurationMessage?.profileKey
+        const syncedProfilePicture = configMessage.content.configurationMessage?.profilePicture
+        if (syncedProfileKey && syncedProfileKey.length && syncedProfilePicture) {
+          const avatar = {
+            key: syncedProfileKey,
+            url: syncedProfilePicture
+          }
+          if (!_.isEqual(this.avatar, avatar)) {
+            this._emit('syncAvatar', avatar)
+          }
+          this.avatar = avatar
+          this.storage.set(StorageKeys.Avatar, JSON.stringify(avatar))
+        } else {
+          this.avatar = undefined
+          this.storage.delete(StorageKeys.Avatar)
+        }
+      }
     },
     updateLastHashes: async (hashes) => {
       const lastHashes = await this.storage.get(StorageKeys.LastHashes)

@@ -1,8 +1,11 @@
+import type { Profile } from '@/profile'
 import type { MediaSavedNotification, Message, MessageDeleted, MessageReadEvent, MessageTypingIndicator, ScreenshotTakenNotification, MessageRequestResponse } from '../messages'
 
 export type EventCallbackSignatures = {
   message: (message: Message) => void
   syncMessage: (message: Message) => void
+  syncDisplayName: (displayName: string) => void
+  syncAvatar: (avatar: Profile['avatar']) => void
   messageDeleted: (message: MessageDeleted) => void
   messageRead: (message: MessageReadEvent) => void
   messageTypingIndicator: (indicator: MessageTypingIndicator) => void

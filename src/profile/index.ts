@@ -24,8 +24,8 @@ export type Profile = {
 }
 
 export type SignalILokiProfile = {
-  lokiProfile: SignalService.DataMessage.ILokiProfile | null | undefined
-  profileKey: Uint8Array | null | undefined
+  lokiProfile: SignalService.DataMessage.ILokiProfile | undefined
+  profileKey: Uint8Array | undefined
 }
 export function serializeProfile(profile: Profile): SignalILokiProfile {
   let signalILokiProfile: SignalService.DataMessage.ILokiProfile | undefined

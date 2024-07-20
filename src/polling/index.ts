@@ -166,7 +166,6 @@ export class Poller {
           .map(r => r.messages)
       )
     )
-    userConfigMessages
 
     const dataMessagesEncrypted = _.uniqBy(
       _.flatten(
@@ -189,7 +188,7 @@ export class Poller {
         lastHash: _.last(m.messages)!.hash
       }))
 
-    const dataMessagesDecrypted = dataMessagesEncrypted
+    const dataMessagesDecrypted = [...dataMessagesEncrypted, ...userConfigMessages]
       .map(m => {
         const content = extractContent(m.data)
         if (content === null) return

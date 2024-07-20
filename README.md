@@ -49,13 +49,14 @@ Use cases:
           - [ ] Web links previews
       - [ ] Service messages
         - [X] Sync message
-        - [ ] Configuration (SharedConfig) message
+        - [X] Configuration message
         - [X] Read message (ReadReceipt)
         - [X] Typing message
         - [X] Message request response
         - [X] Screenshot / media saved (DataExtraction)
         - [X] Delete message (Unsend)
         - [ ] Call message
+          - Just event to display placeholder warning about unsupported feature
     - [ ] Reactions
     - [ ] Closed chats
     - [ ] Open groups (SOGS)
@@ -65,7 +66,7 @@ Use cases:
   - [X] Profile editing
     - [X] Display name
     - [X] Avatar
-    - [ ] Some sort of profile save request to the network?
+    - [X] Syncing between devices
   - [X] ONS resolving
   - [ ] Get rid of ByteBuffer and other lazy dependencies
 
