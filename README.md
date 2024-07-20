@@ -50,6 +50,7 @@ Use cases:
       - [ ] Service messages
         - [X] Sync message
         - [X] Configuration message
+          - Uses legacy constructor for now
         - [X] Read message (ReadReceipt)
         - [X] Typing message
         - [X] Message request response

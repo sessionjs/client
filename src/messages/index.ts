@@ -188,8 +188,8 @@ export type MessageRequestResponse = {
 }
 export function mapMessageRequestResponseMessage({ content, envelope }: Content): MessageRequestResponse {
   const profile = deserializeProfile({
-    lokiProfile: content.messageRequestResponse!.profile,
-    profileKey: content.messageRequestResponse!.profileKey
+    lokiProfile: content.messageRequestResponse!.profile ?? undefined,
+    profileKey: content.messageRequestResponse!.profileKey ?? undefined
   })
   profile.displayName ||= getPlaceholderDisplayName(envelope.source)
   return {
