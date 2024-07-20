@@ -50,7 +50,7 @@ Use cases:
       - [ ] Service messages
         - [X] Sync message
         - [ ] Configuration (SharedConfig) message
-        - [ ] Read message
+        - [X] Read message (ReadReceipt)
         - [ ] Typing message
         - [ ] Message request response
         - [ ] Screenshot / media saved (DataExtraction)

@@ -25,6 +25,7 @@ import { addPoller } from './polling'
 import { getSnodes } from './snodes'
 import { getFile } from '@/instance/get-file'
 import { deleteMessage, deleteMessages } from '@/instance/delete-message'
+import { markMessagesAsRead } from '@/instance/mark-message-as-read'
 
 import { _storeMessage } from '@/instance/_store-message'
 import type { EventCallback, EventName } from './events'
@@ -107,10 +108,10 @@ export class Session {
   getSnodes = getSnodes.bind(this)
 
   /** Add Poller class instance to this Session instance to start polling new messages */
-  addPoller = addPoller.bind(this)
+  public addPoller = addPoller.bind(this)
 
   /** Download attachment received in message object. Returns File with decrypted content */
-  getFile = getFile.bind(this)
+  public getFile = getFile.bind(this)
 
   /**
    * Sends a visible chat message to other Session ID
@@ -138,9 +139,11 @@ export class Session {
    */
   public deleteMessages = deleteMessages.bind(this)
 
+  public markMessagesAsRead = markMessagesAsRead.bind(this)
+
   protected _storeMessage = _storeMessage.bind(this)
 
-  async request<Response, Body = any>({ type, body }: {
+  protected async request<Response, Body = any>({ type, body }: {
     type: RequestType,
     body: Body
   }): Promise<Response> {

@@ -29,17 +29,18 @@ export type MessageAttachment = {
 }
 
 export type Message = (PrivateMessage | ClosedGroupMessage) & {
-  id: string;
-  from: string;
-  text?: string;
-  attachments: MessageAttachment[];
-  getEnvelope: () => EnvelopePlus;
-  getContent: () => SignalService.Content;
+  id: string
+  from: string
+  text?: string
+  attachments: MessageAttachment[]
+  getEnvelope: () => EnvelopePlus
+  getContent: () => SignalService.Content
+  timestamp: number
 }
 
 type Content = {
-  hash: string,
-  envelope: EnvelopePlus,
+  hash: string
+  envelope: EnvelopePlus
   content: SignalService.Content
 }
 
@@ -53,6 +54,14 @@ export function mapDataMessage({ hash, envelope, content }: Content): Message {
   } else {
     from = envelope.source
   }
+  let timestamp = content.dataMessage!.timestamp
+  if (timestamp === null || timestamp === undefined) {
+    timestamp = 0
+  } else {
+    if(typeof timestamp !== 'number') {
+      timestamp = timestamp.toNumber()
+    }
+  }
   return {
     id: hash,
     ...(isGroup ? {
@@ -65,7 +74,8 @@ export function mapDataMessage({ hash, envelope, content }: Content): Message {
     ...(typeof content.dataMessage?.body === 'string' && { text: content.dataMessage.body }),
     attachments: content.dataMessage?.attachments ? parseAttachments(content.dataMessage.attachments) : [],
     getEnvelope: () => envelope,
-    getContent: () => content
+    getContent: () => content,
+    timestamp
   }
 }
 
@@ -85,7 +95,13 @@ export function parseAttachments(attachments: SignalService.IAttachmentPointer[]
   }))
 }
 
-export function mapUnsendMessage({ content }: Content): { timestamp: number, from: string } {
+export type MessageDeleted = {
+  /** Timestamp of deleted message sent in that message constructor. Lookup message by timestamp in saved messages */
+  timestamp: number,
+  /** Sender of message that deleted it */
+  from: string
+}
+export function mapUnsendMessage({ content }: Content): MessageDeleted {
   let timestamp = content.unsendMessage!.timestamp
   if(typeof timestamp !== 'number') {
     timestamp = timestamp.toNumber()
@@ -94,4 +110,24 @@ export function mapUnsendMessage({ content }: Content): { timestamp: number, fro
     timestamp,
     from: content.unsendMessage!.author
   }
+}
+
+export type MessageReadEvent = {
+  /** Timestamp of read message sent in this message constructor. Lookup message by timestamp among locally saved messages */
+  timestamp: number,
+  /** Timestamp when recipient of message read it */
+  // readAt: number, TODO: ReadReceiptMessage has timestamp property, but it does not exist in Signal bindings
+}
+export function mapReceiptMessage({ content }: Content): MessageReadEvent[] {
+  const timestamps = content.receiptMessage!.timestamp
+  if (timestamps === null || timestamps === undefined) {
+    return []
+  }
+  const timestampsNumbers = timestamps.map(t => {
+    if(typeof t !== 'number') {
+      return t.toNumber()
+    }
+    return t
+  })
+  return timestampsNumbers.map(t => ({ timestamp: t }))
 }

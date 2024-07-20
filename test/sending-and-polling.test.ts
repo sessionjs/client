@@ -20,16 +20,20 @@ const randomImageBuffer = await fetch('https://picsum.photos/200/300')
   .then(response => response.arrayBuffer())
 const randomImage = new File([new Uint8Array(randomImageBuffer)], 'random-image.jpg', { type: 'image/jpeg' })
 
+let messageHash: string, timestamp: number
+
 test('sending chat message to the Session user', async () => {
   const session = new Session()
   session.setMnemonic(encode(generateSeedHex()))
-  const { messageHash, syncMessageHash } = await session.sendMessage({ 
+  const response = await session.sendMessage({ 
     to: sessionID,
     text: randomText,
     attachments: [randomImage]
   })
+  messageHash = response.messageHash
+  timestamp = response.timestamp
   expect(messageHash).toBeString()
-  expect(syncMessageHash).toBeString()
+  expect(response.syncMessageHash).toBeString()
 })
 
 test('polling chat messages', async () => {
@@ -57,4 +61,12 @@ test('polling chat messages', async () => {
   const imageBuffer = new Uint8Array(await image.arrayBuffer())
   const randomImageBuffer = new Uint8Array(await randomImage.arrayBuffer())
   expect(Buffer.compare(imageBuffer, randomImageBuffer)).toBe(0)
+})
+
+test('deleting message', async () => {
+  await session.deleteMessage({ to: sessionID, timestamp, hash: messageHash })
+  const messageDeletedPromise = new Promise<{ timestamp: number, from: string }>(resolve => session.on('messageDeleted', resolve))
+  await poller.poll()
+  const message = await messageDeletedPromise
+  expect(message.timestamp).toBe(timestamp)
 })

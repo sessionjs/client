@@ -1,13 +1,14 @@
 import _ from 'lodash'
 import type { Session } from '@/instance'
 import { Poller } from '@/polling'
-import { 
-  mapDataMessage,
-  mapUnsendMessage
-} from '@/messages'
-import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
 import { StorageKeys } from '@session.js/types/storage'
+import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
 import type { Swarm } from '@session.js/types/swarm'
+import {
+  mapDataMessage,
+  mapUnsendMessage,
+  mapReceiptMessage
+} from '@/messages'
 
 export function addPoller(this: Session, poller: Poller) {
   if (!(poller instanceof Poller)) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidPoller, message: 'Poller must be an instance of Poller' })
@@ -38,6 +39,12 @@ export function addPoller(this: Session, poller: Poller) {
         .filter(m => m.content.unsendMessage)
         .map(m => mapUnsendMessage(m))
         .forEach(m => this.emit('messageDeleted', m))
+
+      newMessages
+        .filter(m => m.content.receiptMessage)
+        .map(m => mapReceiptMessage(m))
+        .flat()
+        .forEach(m => this.emit('messageRead', m))
     },
     updateLastHashes: async (hashes) => {
       const lastHashes = await this.storage.get(StorageKeys.LastHashes)
