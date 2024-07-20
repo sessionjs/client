@@ -26,6 +26,7 @@ import { getSnodes } from './snodes'
 import { getFile } from '@/instance/get-file'
 import { deleteMessage, deleteMessages } from '@/instance/delete-message'
 import { markMessagesAsRead } from '@/instance/mark-message-as-read'
+import { showTypingIndicator, hideTypingIndicator } from '@/instance/typing-indicator'
 
 import { _storeMessage } from '@/instance/_store-message'
 import type { EventCallback, EventName } from './events'
@@ -139,7 +140,27 @@ export class Session {
    */
   public deleteMessages = deleteMessages.bind(this)
 
+  /**
+   * Mark message as read and broadcast it to other clients
+   * Might throw SessionFetchError if there is a connection issue
+   * @param from Session ID of sender of the message
+   * @param messagesTimestamps Array of timestamps of the messages to mark as read, returned from message constructor
+   * @param readAt Timestamp when recipient of the message read it, defaults to current time. Does not seem to be used in current Session implementations
+   */
   public markMessagesAsRead = markMessagesAsRead.bind(this)
+
+  /**
+   * Show message typing indicator and broadcast it to other clients for 20 seconds or until hideTypingIndicator is called
+   * Might throw SessionFetchError if there is a connection issue
+   * @param conversation Session ID of conversation where typing indicator should appear
+   */
+  public showTypingIndicator = showTypingIndicator.bind(this)
+  /**
+   * Hide message typing indicator and broadcast it to other clients
+   * Might throw SessionFetchError if there is a connection issue
+   * @param conversation Session ID of conversation where typing indicator should disappear
+   */
+  public hideTypingIndicator = hideTypingIndicator.bind(this)
 
   protected _storeMessage = _storeMessage.bind(this)
 

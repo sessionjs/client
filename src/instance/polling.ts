@@ -7,7 +7,8 @@ import type { Swarm } from '@session.js/types/swarm'
 import {
   mapDataMessage,
   mapUnsendMessage,
-  mapReceiptMessage
+  mapReceiptMessage,
+  mapTypingMessage
 } from '@/messages'
 
 export function addPoller(this: Session, poller: Poller) {
@@ -45,6 +46,11 @@ export function addPoller(this: Session, poller: Poller) {
         .map(m => mapReceiptMessage(m))
         .flat()
         .forEach(m => this._emit('messageRead', m))
+
+      newMessages
+        .filter(m => m.content.typingMessage)
+        .map(m => mapTypingMessage(m))
+        .forEach(m => this._emit('messageTypingIndicator', m))
     },
     updateLastHashes: async (hashes) => {
       const lastHashes = await this.storage.get(StorageKeys.LastHashes)

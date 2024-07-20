@@ -131,3 +131,16 @@ export function mapReceiptMessage({ content }: Content): MessageReadEvent[] {
   })
   return timestampsNumbers.map(t => ({ timestamp: t }))
 }
+
+export type MessageTypingIndicator = {
+  /** If true, you should countdown from 20 and then treat it like recipient stopped typing */
+  isTyping: boolean
+  conversation: string
+}
+export function mapTypingMessage({ content, envelope }: Content): MessageTypingIndicator {
+  const isTyping = content.typingMessage!.action === SignalService.TypingMessage.Action.STARTED
+  return {
+    isTyping,
+    conversation: envelope.source,
+  }
+}

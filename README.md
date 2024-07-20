@@ -51,7 +51,7 @@ Use cases:
         - [X] Sync message
         - [ ] Configuration (SharedConfig) message
         - [X] Read message (ReadReceipt)
-        - [ ] Typing message
+        - [X] Typing message
         - [ ] Message request response
         - [ ] Screenshot / media saved (DataExtraction)
         - [X] Delete message (Unsend)
