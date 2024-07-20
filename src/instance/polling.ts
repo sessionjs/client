@@ -1,7 +1,10 @@
 import _ from 'lodash'
 import type { Session } from '@/instance'
 import { Poller } from '@/polling'
-import { signalMessageToMessage, type Message } from '@/messages'
+import { 
+  mapDataMessage,
+  mapUnsendMessage
+} from '@/messages'
 import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
 import { StorageKeys } from '@session.js/types/storage'
 import type { Swarm } from '@session.js/types/swarm'
@@ -11,20 +14,30 @@ export function addPoller(this: Session, poller: Poller) {
   this.pollers.add(poller)
   poller._attachedToInstance(this, {
     onMessagesReceived: async (messages) => {
-      const dataMessages = messages
-        .filter(m => m.content.dataMessage)
-        .filter(m => !m.content.dataMessage?.syncTarget)
-      const newDataMessages: Message[] = []
-      for (const m of dataMessages) {
+      const newMessages: typeof messages = []
+      for (const m of messages) {
         if (!await this.storage.has('message_hash:' + m.hash)) {
           await this.storage.set('message_hash:' + m.hash, Date.now().toString())
-          const message = signalMessageToMessage(m)
-          newDataMessages.push(message)
+          newMessages.push(m)
         }
       }
-      this.events.get('message')?.forEach(cb => {
-        newDataMessages.forEach(m => cb(m))
-      })
+
+      newMessages
+        .filter(m => m.content.dataMessage)
+        .filter(m => !m.content.dataMessage?.syncTarget)
+        .map(m => mapDataMessage(m))
+        .forEach(m => this.emit('message', m))
+
+      newMessages
+        .filter(m => m.content.dataMessage)
+        .filter(m => m.content.dataMessage?.syncTarget)
+        .map(m => mapDataMessage(m))
+        .forEach(m => this.emit('syncMessage', m))
+
+      newMessages
+        .filter(m => m.content.unsendMessage)
+        .map(m => mapUnsendMessage(m))
+        .forEach(m => this.emit('messageDeleted', m))
     },
     updateLastHashes: async (hashes) => {
       const lastHashes = await this.storage.get(StorageKeys.LastHashes)

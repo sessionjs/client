@@ -23,8 +23,11 @@ import { sendMessage } from './send-message'
 import { getOurSwarm, getSwarmsFor } from './swarms'
 import { addPoller } from './polling'
 import { getSnodes } from './snodes'
-import type { EventCallback, EventName } from './events'
 import { getFile } from '@/instance/get-file'
+import { deleteMessage, deleteMessages } from '@/instance/delete-message'
+
+import { _storeMessage } from '@/instance/_store-message'
+import type { EventCallback, EventName } from './events'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
 
@@ -110,13 +113,32 @@ export class Session {
   getFile = getFile.bind(this)
 
   /**
-   * Sends message to other Session ID
+   * Sends a visible chat message to other Session ID
    * Might throw SessionFetchError if there is a connection issue
    * @param to — Session ID of the recipient
-   * @param attachments — Array of instances of File bytes to send with the message
-   * @returns `Promise<{ messageHash: string, syncMessageHash: string }>` — hashes (identifiers) of the messages sent (visible and sync message_
+   * @param attachments Array of instances of File bytes to send with the message
+   * @returns `Promise<{ messageHash: string, syncMessageHash: string }>` — hashes (identifiers) of the messages sent (visible and sync message)
    */
   public sendMessage = sendMessage.bind(this)
+
+  /**
+   * Propogates unsend request which Session clients use to delete messages locally. For performance reasons, choose deleteMessages for batch deletion of multiple messages
+   * Might throw SessionFetchError if there is a connection issue
+   * @param to Session ID of recipient of the message
+   * @param timestamp Timestamp of the message, returned from sendMessage; this is important and **must be exactly what's returned from sendMessage result**, otherwise clients which already received the message won't be able to delete it
+   * @param hash Saved messageHash identifier of the message to delete, returned from sendMessage
+   */
+  public deleteMessage = deleteMessage.bind(this)
+  /**
+   * Propogates unsend requests which Session clients use to delete messages locally. Alternatively, use deleteMessage for single message deletion
+   * Might throw SessionFetchError if there is a connection issue
+   * @param to Session ID of recipient of the message
+   * @param timestamp Timestamp of the message, returned from sendMessage; this is important and **must be exactly what's returned from sendMessage result**, otherwise clients which already received the message won't be able to delete it
+   * @param hashes Saved messages hashes identifiers of the message to delete, returned from sendMessage's messageHash
+   */
+  public deleteMessages = deleteMessages.bind(this)
+
+  protected _storeMessage = _storeMessage.bind(this)
 
   async request<Response, Body = any>({ type, body }: {
     type: RequestType,
@@ -129,16 +151,18 @@ export class Session {
   on<E extends EventName>(eventName: E, callback: EventCallback<E>) {
     this.addEventListener(eventName, callback)
   }
-
   off<E extends EventName>(eventName: E, callback: EventCallback<E>) {
     this.removeEventListener(eventName, callback)
   }
-
   addEventListener<E extends EventName>(eventName: E, callback: EventCallback<E>) {
     this.events.set(eventName, [...(this.events.get(eventName) ?? []), callback])
   }
-
   removeEventListener<E extends EventName>(eventName: E, callback: EventCallback<E>) {
     this.events.set(eventName, (this.events.get(eventName) ?? []).filter(cb => cb !== callback))
+  }
+  protected emit<E extends EventName>(eventName: E, ...args: Parameters<EventCallback<E>>) {
+    this.events.get(eventName)?.forEach(cb => {
+      (cb as (...args: unknown[]) => void)(...args)
+    })
   }
 }

@@ -1,34 +1,27 @@
-import _ from 'lodash'
-import pRetry from 'p-retry'
 import { v4 as uuid } from 'uuid'
 import type { Session } from '@/instance'
 import { encryptFileAttachment } from '@/attachments/encrypt'
+import { wrap } from '@/crypto/message-encrypt'
 import {
-  wrap,
-  type EncryptAndWrapMessageResults
-} from '@/crypto/message-encrypt'
-import { 
-  SessionFetchError,
-  SessionFetchErrorCode,
   SessionRuntimeError, SessionRuntimeErrorCode, 
   SessionValidationError, SessionValidationErrorCode 
 } from '@session.js/errors'
 import {
   VisibleMessage,
   type AttachmentPointerWithUrl
-} from '@/messages/messages/visible-message'
+} from '@/messages/schema/visible-message'
 import { isHex } from '@/utils'
-import type { ResponseStore, ResponseUploadAttachment } from '@session.js/types/network/response'
-import { RequestType, type RequestStoreBody, type RequestUploadAttachment } from '@session.js/types/network/request'
+import type { ResponseUploadAttachment } from '@session.js/types/network/response'
+import { RequestType, type RequestUploadAttachment } from '@session.js/types/network/request'
 import { SnodeNamespaces } from '@session.js/types'
-import { toRawMessage, type RawMessage } from '@/messages/signal-message'
+import { toRawMessage } from '@/messages/signal-message'
 import { MAX_ATTACHMENT_FILESIZE_BYTES } from '@session.js/consts'
 
 export async function sendMessage(this: Session, { to, text, attachments }: {
   to: string,
   text?: string,
   attachments?: File[]
-}): Promise<{ messageHash: string, syncMessageHash: string }> {
+}): Promise<{ messageHash: string, syncMessageHash: string, timestamp: number }> {
   if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
   if (to.length !== 66) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidSessionID, message: 'Invalid session ID length' })
   if (!to.startsWith('05') || !isHex(to)) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidSessionID, message: 'Session ID must be a hex string starting from 05' })
@@ -105,52 +98,8 @@ export async function sendMessage(this: Session, { to, text, attachments }: {
     }
   ], { networkTimestamp: timestamp })
 
-  const send = async ({ message, data }: { message: RawMessage, data: EncryptAndWrapMessageResults }) => {
-    const messageToSelf = message.recipient === this.sessionID
-    let swarms = messageToSelf
-      ? [await this.getOurSwarm()]
-      : await this.getSwarmsFor(message.recipient)
-    return await pRetry(async () => {
-      let swarm
-      if (messageToSelf) {
-        if (swarms.length) {
-          swarm = _.sample(swarms)
-        } else {
-          swarm = _.sample(this.ourSwarms)
-          this.ourSwarm = swarm
-        }
-      } else {
-        swarm = _.sample(swarms)
-      }
-      if (!swarm) throw new SessionFetchError({ code: SessionFetchErrorCode.NoSwarmsAvailable, message: 'No swarms available' })
-      try {
-        const { hash } = await this.request<ResponseStore, RequestStoreBody>({
-          type: RequestType.Store,
-          body: {
-            swarm: swarm,
-            destination: message.recipient,
-            data64: data.data64,
-            ttl: data.ttl,
-            timestamp: data.networkTimestamp,
-            namespace: data.namespace,
-          }
-        })
-        return hash
-      } catch (e) {
-        if (e instanceof SessionFetchError && e.code === SessionFetchErrorCode.RetryWithOtherNode421Error) {
-          swarms = swarms.filter(s => s !== swarm)
-          this.ourSwarms = this.ourSwarms!.filter(s => s !== swarm)
-        }
-        throw e
-      }
-    }, {
-      retries: 5,
-      shouldRetry: e => e instanceof SessionFetchError && e.code === SessionFetchErrorCode.RetryWithOtherNode421Error
-    })
-  }
+  const messageHash = await this._storeMessage({ message: rawMessage, data: messageEncrypted })
+  const syncMessageHash = await this._storeMessage({ message: rawSyncMessage, data: syncMessageEncrypted })
 
-  const messageHash = await send({ message: rawMessage, data: messageEncrypted })
-  const syncMessageHash = await send({ message: rawSyncMessage, data: syncMessageEncrypted })
-
-  return { messageHash, syncMessageHash }
+  return { messageHash, syncMessageHash, timestamp }
 }

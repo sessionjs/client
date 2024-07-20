@@ -37,11 +37,13 @@ export type Message = (PrivateMessage | ClosedGroupMessage) & {
   getContent: () => SignalService.Content;
 }
 
-export function signalMessageToMessage({ hash, envelope, content }: {
-  hash: string, 
-  envelope: EnvelopePlus, 
+type Content = {
+  hash: string,
+  envelope: EnvelopePlus,
   content: SignalService.Content
-}): Message {
+}
+
+export function mapDataMessage({ hash, envelope, content }: Content): Message {
   const isGroup = envelope.type === SignalService.Envelope.Type.CLOSED_GROUP_MESSAGE
   let groupId: string | undefined
   let from: string
@@ -81,4 +83,15 @@ export function parseAttachments(attachments: SignalService.IAttachmentPointer[]
     ...(attachment.key && { _key: attachment.key }),
     ...(attachment.digest && { _digest: attachment.digest })
   }))
+}
+
+export function mapUnsendMessage({ content }: Content): { timestamp: number, from: string } {
+  let timestamp = content.unsendMessage!.timestamp
+  if(typeof timestamp !== 'number') {
+    timestamp = timestamp.toNumber()
+  }
+  return {
+    timestamp,
+    from: content.unsendMessage!.author
+  }
 }

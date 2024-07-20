@@ -1,4 +1,4 @@
-# Session.js
+-00--0-0# Session.js
 
 Session.js is a JavaScript library to use [Session messenger by OXEN](https://getsession.org) programmatically. Can be used entirely on server or in browser with server proxy. Includes TypeScript definitions. Tests with bun:test.
 
@@ -32,7 +32,7 @@ Use cases:
 <details>
   <summary>Full roadmap</summary>
     
-  - [X] Messages receiving
+  - [X] Messages
     - [X] Automatic snodes fetching
     - [X] Automatic swarms selection
     - [ ] Manual snode/swarm control
@@ -47,27 +47,19 @@ Use cases:
           - [ ] Voice messages
           - [ ] Quotes
           - [ ] Web links previews
-      - [ ] Configuration message
-      - [ ] Sync message
-      - [ ] Read message
-      - [ ] Media downloaded by recipient
+      - [ ] Service messages
+        - [X] Sync message
+        - [ ] Configuration (SharedConfig) message
+        - [ ] Read message
+        - [ ] Typing message
+        - [ ] Message request response
+        - [ ] Screenshot / media saved (DataExtraction)
+        - [X] Delete message (Unsend)
+        - [ ] Call message
+    - [ ] Reactions
     - [ ] Closed chats
     - [ ] Open groups (SOGS)
-  - [X] Messages sending
-    - [X] Data storing to swarms
-    - [X] Messages types
-      - [X] Regular chat message
-        - [X] Text
-        - [X] Attachments
-          - [X] Images
-          - [X] Files
-          - [ ] Voice messages
-          - [ ] Quotes
-          - [ ] Web links previews
-      - [X] Sync message
-      - [ ] Read message
-      - [ ] Media downloaded by us
-  - [ ] Messages deleting
+  - [ ] Calls
   - [ ] Messages editing (SOGS)
   - [X] Profile editing
     - [X] Display name

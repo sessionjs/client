@@ -1,6 +1,6 @@
 {
   "name": "@session.js/client",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "type": "module",
   "homepage": "https://github.com/sessionjs/client",
   "repository": {
@@ -43,12 +43,12 @@
     "README.md"
   ],
   "dependencies": {
-    "@session.js/bun-network": "^1.0.3",
+    "@session.js/bun-network": "^1.0.4",
     "@session.js/consts": "^1.0.3",
     "@session.js/errors": "^1.0.9",
     "@session.js/keypair": "^1.0.2",
     "@session.js/mnemonic": "^1.0.4",
-    "@session.js/types": "^1.0.6",
+    "@session.js/types": "^1.0.8",
     "bytebuffer": "^5.0.1",
     "libsodium-wrappers-sumo": "^0.7.13",
     "lodash": "^4.17.21",
