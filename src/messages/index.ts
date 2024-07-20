@@ -144,3 +144,39 @@ export function mapTypingMessage({ content, envelope }: Content): MessageTypingI
     conversation: envelope.source,
   }
 }
+
+export type ScreenshotTakenNotification = {
+  /** Timestamp when screenshot was taken */
+  timestamp: number
+}
+export function mapScreenshotTakenMessage({ content }: Content): ScreenshotTakenNotification {
+  let timestamp = content.dataExtractionNotification!.timestamp
+  if(timestamp === null || timestamp === undefined) {
+    timestamp = 0
+  } else {
+    if(typeof timestamp !== 'number') {
+      timestamp = timestamp.toNumber()
+    }
+  }
+  return {
+    timestamp
+  }
+}
+
+export type MediaSavedNotification = {
+  /** Message's timestamp which has attachment that was downloaded */
+  timestamp: number
+}
+export function mapMediaSavedMessage({ content }: Content): MediaSavedNotification {
+  let timestamp = content.dataExtractionNotification!.timestamp
+  if(timestamp === null || timestamp === undefined) {
+    timestamp = 0
+  } else {
+    if(typeof timestamp !== 'number') {
+      timestamp = timestamp.toNumber()
+    }
+  }
+  return {
+    timestamp
+  }
+}

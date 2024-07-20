@@ -53,12 +53,13 @@ Use cases:
         - [X] Read message (ReadReceipt)
         - [X] Typing message
         - [ ] Message request response
-        - [ ] Screenshot / media saved (DataExtraction)
+        - [X] Screenshot / media saved (DataExtraction)
         - [X] Delete message (Unsend)
         - [ ] Call message
     - [ ] Reactions
     - [ ] Closed chats
     - [ ] Open groups (SOGS)
+    - [ ] Expirable messages
   - [ ] Calls
   - [ ] Messages editing (SOGS)
   - [X] Profile editing

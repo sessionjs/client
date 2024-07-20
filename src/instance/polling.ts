@@ -4,11 +4,14 @@ import { Poller } from '@/polling'
 import { StorageKeys } from '@session.js/types/storage'
 import { SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
 import type { Swarm } from '@session.js/types/swarm'
+import { SignalService } from '@session.js/types/signal-bindings'
 import {
   mapDataMessage,
   mapUnsendMessage,
   mapReceiptMessage,
-  mapTypingMessage
+  mapTypingMessage,
+  mapScreenshotTakenMessage,
+  mapMediaSavedMessage
 } from '@/messages'
 
 export function addPoller(this: Session, poller: Poller) {
@@ -51,6 +54,22 @@ export function addPoller(this: Session, poller: Poller) {
         .filter(m => m.content.typingMessage)
         .map(m => mapTypingMessage(m))
         .forEach(m => this._emit('messageTypingIndicator', m))
+
+      newMessages
+        .filter(m => m.content.dataExtractionNotification &&
+          m.content.dataExtractionNotification.type ===
+          SignalService.DataExtractionNotification.Type.SCREENSHOT
+        )
+        .map(m => mapScreenshotTakenMessage(m))
+        .forEach(m => this._emit('screenshotTaken', m))
+
+      newMessages
+        .filter(m => m.content.dataExtractionNotification && 
+          m.content.dataExtractionNotification.type === 
+          SignalService.DataExtractionNotification.Type.MEDIA_SAVED
+        )
+        .map(m => mapMediaSavedMessage(m))
+        .forEach(m => this._emit('mediaSaved', m))
     },
     updateLastHashes: async (hashes) => {
       const lastHashes = await this.storage.get(StorageKeys.LastHashes)

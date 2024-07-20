@@ -27,8 +27,9 @@ import { getFile } from '@/instance/get-file'
 import { deleteMessage, deleteMessages } from '@/instance/delete-message'
 import { markMessagesAsRead } from '@/instance/mark-message-as-read'
 import { showTypingIndicator, hideTypingIndicator } from '@/instance/typing-indicator'
+import { notifyScreenshotTaken, notifyMediaSaved } from '@/instance/data-extraction-notification'
 
-import { _storeMessage } from '@/instance/_store-message'
+import { _storeMessage } from '@/instance/store-message'
 import type { EventCallback, EventName } from './events'
 
 export const forbiddenDisplayCharRegex = /\uFFD2*/g
@@ -141,7 +142,7 @@ export class Session {
   public deleteMessages = deleteMessages.bind(this)
 
   /**
-   * Mark message as read and broadcast it to other clients
+   * Mark message as read and broadcast it to recipient
    * Might throw SessionFetchError if there is a connection issue
    * @param from Session ID of sender of the message
    * @param messagesTimestamps Array of timestamps of the messages to mark as read, returned from message constructor
@@ -150,17 +151,32 @@ export class Session {
   public markMessagesAsRead = markMessagesAsRead.bind(this)
 
   /**
-   * Show message typing indicator and broadcast it to other clients for 20 seconds or until hideTypingIndicator is called
+   * Show message typing indicator to recipient for 20 seconds or until hideTypingIndicator is called
    * Might throw SessionFetchError if there is a connection issue
    * @param conversation Session ID of conversation where typing indicator should appear
    */
   public showTypingIndicator = showTypingIndicator.bind(this)
   /**
-   * Hide message typing indicator and broadcast it to other clients
+   * Hide message typing indicator from recipient
    * Might throw SessionFetchError if there is a connection issue
    * @param conversation Session ID of conversation where typing indicator should disappear
    */
   public hideTypingIndicator = hideTypingIndicator.bind(this)
+
+  /**
+   * Show notification that screenshot was taken in chat and broadcast it to other clients
+   * Might throw SessionFetchError if there is a connection issue
+   * @param conversation Session ID of conversation where screenshot was taken
+   */
+  public notifyScreenshotTaken = notifyScreenshotTaken.bind(this)
+
+  /**
+   * Show notification that attachment was downloaded in chat and broadcast it to other clients
+   * Might throw SessionFetchError if there is a connection issue
+   * @param conversation Session ID of conversation where attachment was downloaded
+   * @param savedMessageTimestamp Timestamp of the message with attachment, returned from sendMessage
+   */
+  public notifyMediaSaved = notifyMediaSaved.bind(this)
 
   protected _storeMessage = _storeMessage.bind(this)
 
