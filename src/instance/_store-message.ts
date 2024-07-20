@@ -26,7 +26,7 @@ export async function _storeMessage(this: Session, { message, data }: { message:
     }
     if (!swarm) throw new SessionFetchError({ code: SessionFetchErrorCode.NoSwarmsAvailable, message: 'No swarms available' })
     try {
-      const { hash } = await this.request<ResponseStore, RequestStoreBody>({
+      const { hash } = await this._request<ResponseStore, RequestStoreBody>({
         type: RequestType.Store,
         body: {
           swarm: swarm,

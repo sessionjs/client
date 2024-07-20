@@ -17,7 +17,7 @@ export async function getSwarmsFor(this: Session, sessionID: string) {
     const snode = _.sample(snodes)
     if (!snode) throw new SessionFetchError({ code: SessionFetchErrorCode.NoSnodesAvailable, message: 'No snodes available' })
     try {
-      const { swarms } = await this.request<ResponseGetSwarms, RequestGetSwarmsBody>({ type: RequestType.GetSwarms, body: { snode, pubkey: sessionID } })
+      const { swarms } = await this._request<ResponseGetSwarms, RequestGetSwarmsBody>({ type: RequestType.GetSwarms, body: { snode, pubkey: sessionID } })
       if (swarms.length === 0) {
         throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.NoSwarmsAvailable, message: 'No swarms found for ' + sessionID })
       }

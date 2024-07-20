@@ -143,7 +143,7 @@ export class Session {
 
   protected _storeMessage = _storeMessage.bind(this)
 
-  protected async request<Response, Body = any>({ type, body }: {
+  async _request<Response, Body = any>({ type, body }: {
     type: RequestType,
     body: Body
   }): Promise<Response> {
@@ -163,7 +163,7 @@ export class Session {
   removeEventListener<E extends EventName>(eventName: E, callback: EventCallback<E>) {
     this.events.set(eventName, (this.events.get(eventName) ?? []).filter(cb => cb !== callback))
   }
-  protected emit<E extends EventName>(eventName: E, ...args: Parameters<EventCallback<E>>) {
+  protected _emit<E extends EventName>(eventName: E, ...args: Parameters<EventCallback<E>>) {
     this.events.get(eventName)?.forEach(cb => {
       (cb as (...args: unknown[]) => void)(...args)
     })

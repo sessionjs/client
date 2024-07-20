@@ -127,7 +127,7 @@ export class Poller {
     let messages: ResponsePoll['messages'] | undefined = undefined
     do {
       try {
-        const response = await this.instance.request<ResponsePoll, RequestPollBody>({
+        const response = await this.instance._request<ResponsePoll, RequestPollBody>({
           type: RequestType.Poll,
           body: {
             swarm: ourSwarm,

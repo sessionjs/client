@@ -8,7 +8,7 @@ export async function getFile(this: Session, attachment: MessageAttachment): Pro
   if (attachment._key === undefined || attachment._digest === undefined) {
     throw new SessionCryptoError({ code: SessionCryptoErrorCode.MessageDecryptionFailed, message: 'Missing attachment key or digest' })
   }
-  const fileBuffer = await this.request<ArrayBuffer, RequestDownloadAttachment>({
+  const fileBuffer = await this._request<ArrayBuffer, RequestDownloadAttachment>({
     type: RequestType.DownloadAttachment,
     body: { id: attachment.id }
   })

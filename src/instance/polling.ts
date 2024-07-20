@@ -27,24 +27,24 @@ export function addPoller(this: Session, poller: Poller) {
         .filter(m => m.content.dataMessage)
         .filter(m => !m.content.dataMessage?.syncTarget)
         .map(m => mapDataMessage(m))
-        .forEach(m => this.emit('message', m))
+        .forEach(m => this._emit('message', m))
 
       newMessages
         .filter(m => m.content.dataMessage)
         .filter(m => m.content.dataMessage?.syncTarget)
         .map(m => mapDataMessage(m))
-        .forEach(m => this.emit('syncMessage', m))
+        .forEach(m => this._emit('syncMessage', m))
 
       newMessages
         .filter(m => m.content.unsendMessage)
         .map(m => mapUnsendMessage(m))
-        .forEach(m => this.emit('messageDeleted', m))
+        .forEach(m => this._emit('messageDeleted', m))
 
       newMessages
         .filter(m => m.content.receiptMessage)
         .map(m => mapReceiptMessage(m))
         .flat()
-        .forEach(m => this.emit('messageRead', m))
+        .forEach(m => this._emit('messageRead', m))
     },
     updateLastHashes: async (hashes) => {
       const lastHashes = await this.storage.get(StorageKeys.LastHashes)

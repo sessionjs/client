@@ -50,7 +50,7 @@ async function deleteMessagesFromSwarm(this: Session, { hashes }: { hashes: stri
     }
     if (!swarm) throw new SessionFetchError({ code: SessionFetchErrorCode.NoSwarmsAvailable, message: 'No swarms available' })
     try {
-      await this.request<Record<string, never>, RequestDeleteMessages>({
+      await this._request<Record<string, never>, RequestDeleteMessages>({
         type: RequestType.DeleteMessages,
         body: {
           hashes,

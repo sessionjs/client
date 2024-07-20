@@ -32,7 +32,7 @@ export async function sendMessage(this: Session, { to, text, attachments }: {
   if (attachments) {
     for (const attachment of attachments ?? []) {
       const encrypted = await encryptFileAttachment(attachment)
-      const uploaded = await this.request<ResponseUploadAttachment, RequestUploadAttachment>({ type: RequestType.UploadAttachment, body: { data: encrypted.ciphertext } })
+      const uploaded = await this._request<ResponseUploadAttachment, RequestUploadAttachment>({ type: RequestType.UploadAttachment, body: { data: encrypted.ciphertext } })
       attachmentsPointers.push({
         contentType: attachment.type,
         id: uploaded.id,
