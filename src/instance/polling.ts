@@ -12,7 +12,8 @@ import {
   mapTypingMessage,
   mapScreenshotTakenMessage,
   mapMediaSavedMessage,
-  mapMessageRequestResponseMessage
+  mapMessageRequestResponseMessage,
+  mapCallMessage
 } from '@/messages'
 
 export function addPoller(this: Session, poller: Poller) {
@@ -93,7 +94,6 @@ export function addPoller(this: Session, poller: Poller) {
 
       if (configMessage) {
         const syncedDisplayName = configMessage.content.configurationMessage?.displayName
-        console.log({ syncedDisplayName, current: this.displayName })
         if (syncedDisplayName) {
           if(this.displayName !== syncedDisplayName) {
             this._emit('syncDisplayName', syncedDisplayName)
@@ -118,6 +118,10 @@ export function addPoller(this: Session, poller: Poller) {
           this.storage.delete(StorageKeys.Avatar)
         }
       }
+
+      newMessages.filter(m => m.content.callMessage)
+        .map(m => mapCallMessage(m))
+        .forEach(m => this._emit('call', m))
     },
     updateLastHashes: async (hashes) => {
       const lastHashes = await this.storage.get(StorageKeys.LastHashes)

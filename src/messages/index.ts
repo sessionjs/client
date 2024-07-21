@@ -35,9 +35,21 @@ export type Message = (PrivateMessage | ClosedGroupMessage) & {
   from: string
   text?: string
   attachments: MessageAttachment[]
+  replyToMessage?: {
+    timestamp: number
+    author: string
+    text?: string
+    attachments?: QuotedAttachment[]
+  }
+  timestamp: number
   getEnvelope: () => EnvelopePlus
   getContent: () => SignalService.Content
-  timestamp: number
+  getReplyToMessage: () => Message['replyToMessage']
+}
+
+export type QuotedAttachment = {
+  contentType?: string
+  fileName?: string
 }
 
 type Content = {
@@ -64,6 +76,7 @@ export function mapDataMessage({ hash, envelope, content }: Content): Message {
       timestamp = timestamp.toNumber()
     }
   }
+  const attachments = content.dataMessage?.attachments ? parseAttachments(content.dataMessage.attachments) : []  
   return {
     id: hash,
     ...(isGroup ? {
@@ -74,10 +87,20 @@ export function mapDataMessage({ hash, envelope, content }: Content): Message {
     }),
     from,
     ...(typeof content.dataMessage?.body === 'string' && { text: content.dataMessage.body }),
-    attachments: content.dataMessage?.attachments ? parseAttachments(content.dataMessage.attachments) : [],
+    attachments,
+    ...(content.dataMessage?.quote && { replyToMessage: parseQuote(content.dataMessage.quote) }),
+    timestamp,
     getEnvelope: () => envelope,
     getContent: () => content,
-    timestamp
+    getReplyToMessage: () => ({
+      author: from,
+      timestamp: timestamp,
+      attachments: attachments.map(a => ({
+        ...(a.metadata.contentType && { contentType: a.metadata.contentType }),
+        ...(a.name && { fileName: a.name })
+      })),
+      ...(typeof content.dataMessage?.body === 'string' && { text: content.dataMessage?.body })
+    })
   }
 }
 
@@ -95,6 +118,22 @@ export function parseAttachments(attachments: SignalService.IAttachmentPointer[]
     ...(attachment.key && { _key: attachment.key }),
     ...(attachment.digest && { _digest: attachment.digest })
   }))
+}
+
+export function parseQuote(quote: SignalService.DataMessage.IQuote): Message['replyToMessage'] {
+  let id = quote.id
+  if(typeof id !== 'number') {
+    id = id.toNumber()
+  }
+  return {
+    timestamp: id,
+    author: quote.author,
+    ...(quote.text && { text: quote.text }),
+    ...(quote.attachments && { attachments: quote.attachments.map(a => ({
+      ...(a.contentType && { contentType: a.contentType }),
+      ...(a.fileName && { fileName: a.fileName })
+    })) }),
+  }
 }
 
 export type MessageDeleted = {
@@ -194,5 +233,16 @@ export function mapMessageRequestResponseMessage({ content, envelope }: Content)
   profile.displayName ||= getPlaceholderDisplayName(envelope.source)
   return {
     profile
+  }
+}
+
+export type CallMessage = {
+  uuid: string
+  type: SignalService.CallMessage.Type
+}
+export function mapCallMessage({ content }: Content): CallMessage {
+  return {
+    uuid: content.callMessage!.uuid,
+    type: content.callMessage!.type
   }
 }

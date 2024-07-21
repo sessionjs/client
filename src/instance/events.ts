@@ -1,5 +1,5 @@
 import type { Profile } from '@/profile'
-import type { MediaSavedNotification, Message, MessageDeleted, MessageReadEvent, MessageTypingIndicator, ScreenshotTakenNotification, MessageRequestResponse } from '../messages'
+import type { MediaSavedNotification, Message, MessageDeleted, MessageReadEvent, MessageTypingIndicator, ScreenshotTakenNotification, MessageRequestResponse, CallMessage } from '../messages'
 
 export type EventCallbackSignatures = {
   message: (message: Message) => void
@@ -12,6 +12,7 @@ export type EventCallbackSignatures = {
   screenshotTaken: (notification: ScreenshotTakenNotification) => void
   mediaSaved: (notification: MediaSavedNotification) => void,
   messageRequestApproved: (message: MessageRequestResponse) => void
+  call: (call: CallMessage) => void
 }
 export type EventName = keyof EventCallbackSignatures
 export type EventCallback<E extends EventName> = EventCallbackSignatures[E]

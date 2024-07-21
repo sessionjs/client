@@ -39,13 +39,13 @@ Use cases:
     - [X] Data retrieving from swarms
     - [X] Messages polling
     - [X] Messages types
-      - [X] Regular chat message
+    - [X] Regular chat message
         - [X] Text
         - [X] Attachments
           - [X] Images
           - [X] Files
-          - [ ] Voice messages
-          - [ ] Quotes
+          - [X] Voice messages
+          - [X] Quotes
           - [ ] Web links previews
       - [ ] Service messages
         - [X] Sync message
@@ -56,7 +56,7 @@ Use cases:
         - [X] Message request response
         - [X] Screenshot / media saved (DataExtraction)
         - [X] Delete message (Unsend)
-        - [ ] Call message
+        - [X] Call message
           - Just event to display placeholder warning about unsupported feature
     - [ ] Reactions
     - [ ] Closed chats
