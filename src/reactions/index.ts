@@ -28,31 +28,28 @@ export class RecentReactions {
   }
 }
 
-export enum Action {
+export enum ReactionAction {
   REACT = 0,
   REMOVE = 1,
 }
 
 export interface Reaction {
-  // this is in fact a uint64 so we will have an issue
-  id: number; // original message timestamp
+  id: number;
   author: string;
   emoji: string;
-  action: Action;
+  action: ReactionAction;
 }
 
-// used for logic operations with reactions i.e responses, db, etc.
 export type ReactionList = Record<
   string,
   {
     count: number;
-    index: number; // relies on reactsIndex in the message model
+    index: number;
     senders: Array<string>;
-    you: boolean; // whether we are in the senders list, used within 1-1 and closed groups for ignoring duplicate data messages, used within opengroups since we dont always have the full list of senders.
+    you: boolean;
   }
 >;
 
-// used when rendering reactions to guarantee sorted order using the index
 export type SortedReactionList = Array<
   [string, { count: number; index: number; senders: Array<string>; you?: boolean }]
 >;

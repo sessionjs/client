@@ -107,5 +107,5 @@ export function checkNetwork(network: unknown) {
 }
 
 export function getPlaceholderDisplayName(sessionID: string): string {
-  return `(${sessionID.slice(0, 3)}...${sessionID.slice(-3)})`
+  return `(${sessionID.slice(0, 4)}...${sessionID.slice(-4)})`
 }

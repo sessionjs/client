@@ -1,7 +1,7 @@
 import { SignalService } from '@session.js/types/signal-bindings'
 import { ExpirableMessage, type ExpirableMessageParams } from '../expirable-message'
 
-import type { Reaction } from '@/reactions'
+import { ReactionAction, type Reaction } from '@/reactions'
 import { serializeProfile, type Profile } from '@/profile'
 
 interface AttachmentPointerCommon {
@@ -123,7 +123,12 @@ export class VisibleMessage extends ExpirableMessage {
       dataMessage.preview = this.preview
     }
     if (this.reaction) {
-      dataMessage.reaction = this.reaction
+      dataMessage.reaction = {
+        ...this.reaction,
+        action: this.reaction.action === ReactionAction.REACT
+          ? SignalService.DataMessage.Reaction.Action.REACT 
+          : SignalService.DataMessage.Reaction.Action.REMOVE
+      }
     }
     if (this.syncTarget) {
       dataMessage.syncTarget = this.syncTarget

@@ -119,12 +119,11 @@ export async function sendMessage(this: Session, { to, text, attachments, voiceM
   })
   const syncMessage = new VisibleMessage({
     body: text,
-    profile: undefined,
     timestamp: timestamp,
     expirationType: 'unknown',
     expireTimer: 0,
     identifier: uuid(),
-    attachments: [],
+    attachments: attachmentsPointers,
     preview: [],
     reaction: undefined,
     syncTarget: to,
@@ -132,7 +131,7 @@ export async function sendMessage(this: Session, { to, text, attachments, voiceM
   })
 
   const rawMessage = toRawMessage(to, msg, SnodeNamespaces.UserMessages)
-  const rawSyncMessage = toRawMessage(to, syncMessage, SnodeNamespaces.UserMessages)
+  const rawSyncMessage = toRawMessage(this.sessionID, syncMessage, SnodeNamespaces.UserMessages)
 
   const [messageEncrypted, syncMessageEncrypted] = await wrap(this.keypair, [
     {

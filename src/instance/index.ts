@@ -28,11 +28,12 @@ import { showTypingIndicator, hideTypingIndicator } from './typing-indicator'
 import { notifyScreenshotTaken, notifyMediaSaved } from './data-extraction-notification'
 import { acceptConversationRequest } from './accept-conversation-request'
 import { setAvatar } from './set-avatar'
+import { setDisplayName } from './display-name'
+import { addReaction, removeReaction } from './reactions'
 
 import { _storeMessage } from './store-message'
 import type { EventCallback, EventName } from './events'
 import { downloadAvatar, type Profile } from '@/profile'
-import { setDisplayName } from '@/instance/display-name'
 
 export class Session {
   protected mnemonic: string | undefined
@@ -102,7 +103,7 @@ export class Session {
 
   /** 
    * Get this instance's cached avatar.  Note that it doesn't fetch avatar from network, since avatar comes in a configuration message, so this method might return undefined
-   * If you're looking for a way to get other user's avatar, please make yourself familiar with "How Session profiles work" in the documentation
+   * If you're looking for a way to get other user's avatar, please make yourself familiar with [How Session profiles work](https://sessionjs.github.io/docs/principles/users/#how-session-profiles-work) in the documentation
    * If you're looking for a method to download and decrypt avatar's image, please use downloadAvatar
    */
   public getAvatar() {
@@ -213,6 +214,23 @@ export class Session {
    * @param from Session ID of the sender of the conversation request
    */
   public acceptConversationRequest = acceptConversationRequest.bind(this)
+
+  /**
+   * Add emoji reaction to the message
+   * Might throw SessionFetchError if there is a connection issue
+   * @param messageTimestamp Timestamp of the message to react to, obtained from message object
+   * @param messageAuthor Session ID of the author of the message to react to
+   * @param emoji Emoji as string to add to reactions list. Any unicode character(s) are accepted, length is practically unlimited, but most clients will only display reaction if it's a single valid emoji.
+   */
+  public addReaction = addReaction.bind(this)
+  /**
+   * Remove emoji reaction from the message
+   * Might throw SessionFetchError if there is a connection issue
+   * @param messageTimestamp Timestamp of the message to remove react from, obtained from message object
+   * @param messageAuthor Session ID of the author of the message to remove reaction from
+   * @param emoji Emoji as string to add to reactions list. Any unicode character(s) are accepted, length is practically unlimited, but most clients will only display reaction if it's a single valid emoji
+   */
+  public removeReaction = removeReaction.bind(this)
 
   protected _storeMessage = _storeMessage.bind(this)
 

@@ -47,6 +47,8 @@ export type Message = (PrivateMessage | ClosedGroupMessage) & {
   getReplyToMessage: () => Message['replyToMessage']
 }
 
+export type SyncMessage = Omit<Message, 'from'> & { to: string }
+
 export type QuotedAttachment = {
   contentType?: string
   fileName?: string
@@ -68,13 +70,9 @@ export function mapDataMessage({ hash, envelope, content }: Content): Message {
   } else {
     from = envelope.source
   }
-  let timestamp = content.dataMessage!.timestamp
-  if (timestamp === null || timestamp === undefined) {
-    timestamp = 0
-  } else {
-    if(typeof timestamp !== 'number') {
-      timestamp = timestamp.toNumber()
-    }
+  let timestamp = envelope.timestamp
+  if(typeof timestamp !== 'number') {
+    timestamp = timestamp.toNumber()
   }
   const attachments = content.dataMessage?.attachments ? parseAttachments(content.dataMessage.attachments) : []  
   return {
@@ -86,6 +84,9 @@ export function mapDataMessage({ hash, envelope, content }: Content): Message {
       type: 'private'
     }),
     from,
+    ...(content.dataMessage!.syncTarget && {
+      to: content.dataMessage!.syncTarget
+    }),
     ...(typeof content.dataMessage?.body === 'string' && { text: content.dataMessage.body }),
     attachments,
     ...(content.dataMessage?.quote && { replyToMessage: parseQuote(content.dataMessage.quote) }),
@@ -158,8 +159,10 @@ export type MessageReadEvent = {
   timestamp: number,
   /** Timestamp when recipient of message read it */
   // readAt: number, TODO: ReadReceiptMessage has timestamp property, but it does not exist in Signal bindings
+  /** Session ID of conversation where message was read */
+  conversation: string
 }
-export function mapReceiptMessage({ content }: Content): MessageReadEvent[] {
+export function mapReceiptMessage({ content, envelope }: Content): MessageReadEvent[] {
   const timestamps = content.receiptMessage!.timestamp
   if (timestamps === null || timestamps === undefined) {
     return []
@@ -170,12 +173,13 @@ export function mapReceiptMessage({ content }: Content): MessageReadEvent[] {
     }
     return t
   })
-  return timestampsNumbers.map(t => ({ timestamp: t }))
+  return timestampsNumbers.map(t => ({ timestamp: t, conversation: envelope.source }))
 }
 
 export type MessageTypingIndicator = {
   /** If true, you should countdown from 20 and then treat it like recipient stopped typing */
   isTyping: boolean
+  /** Session ID of conversation where typing indicator appeared or disappeared */
   conversation: string
 }
 export function mapTypingMessage({ content, envelope }: Content): MessageTypingIndicator {
@@ -189,8 +193,10 @@ export function mapTypingMessage({ content, envelope }: Content): MessageTypingI
 export type ScreenshotTakenNotification = {
   /** Timestamp when screenshot was taken */
   timestamp: number
+  /** Session ID of conversation where notification appeared */
+  conversation: string
 }
-export function mapScreenshotTakenMessage({ content }: Content): ScreenshotTakenNotification {
+export function mapScreenshotTakenMessage({ content, envelope }: Content): ScreenshotTakenNotification {
   let timestamp = content.dataExtractionNotification!.timestamp
   if(timestamp === null || timestamp === undefined) {
     timestamp = 0
@@ -200,15 +206,18 @@ export function mapScreenshotTakenMessage({ content }: Content): ScreenshotTaken
     }
   }
   return {
-    timestamp
+    timestamp,
+    conversation: envelope.source
   }
 }
 
 export type MediaSavedNotification = {
   /** Message's timestamp which has attachment that was downloaded */
-  timestamp: number
+  timestamp: number,
+  /** Session ID of conversation where notification appeared */
+  conversation: string
 }
-export function mapMediaSavedMessage({ content }: Content): MediaSavedNotification {
+export function mapMediaSavedMessage({ content, envelope }: Content): MediaSavedNotification {
   let timestamp = content.dataExtractionNotification!.timestamp
   if(timestamp === null || timestamp === undefined) {
     timestamp = 0
@@ -218,12 +227,14 @@ export function mapMediaSavedMessage({ content }: Content): MediaSavedNotificati
     }
   }
   return {
-    timestamp
+    timestamp,
+    conversation: envelope.source
   }
 }
 
 export type MessageRequestResponse = {
   profile: Profile
+  conversation: string
 }
 export function mapMessageRequestResponseMessage({ content, envelope }: Content): MessageRequestResponse {
   const profile = deserializeProfile({
@@ -232,17 +243,45 @@ export function mapMessageRequestResponseMessage({ content, envelope }: Content)
   })
   profile.displayName ||= getPlaceholderDisplayName(envelope.source)
   return {
-    profile
+    profile,
+    conversation: envelope.source
   }
 }
 
 export type CallMessage = {
   uuid: string
   type: SignalService.CallMessage.Type
+  from: string
 }
-export function mapCallMessage({ content }: Content): CallMessage {
+export function mapCallMessage({ content, envelope }: Content): CallMessage {
   return {
     uuid: content.callMessage!.uuid,
-    type: content.callMessage!.type
+    type: content.callMessage!.type,
+    from: envelope.source
+  }
+}
+
+export type ReactionMessage = {
+  messageTimestamp: number
+  messageAuthor: string
+  reactionFrom: string
+  /** Emoji as string. Any unicode character(s) may be in this field, length is practically unlimited, validation is not performed by the @session.js/client library. You should probably only display the reaction, if it's a single valid emoji */
+  emoji: string
+}
+export function mapReactionMessage({ content, envelope }: Content): ReactionMessage | null {
+  let messageTimestamp = content.dataMessage?.reaction!.id
+  if (messageTimestamp === null || messageTimestamp === undefined) return null
+  const emoji = content.dataMessage?.reaction?.emoji
+  if (!emoji) return null
+  const author = content.dataMessage?.reaction?.author
+  if (!author) return null
+  if(typeof messageTimestamp !== 'number') {
+    messageTimestamp = messageTimestamp.toNumber()
+  }
+  return {
+    messageTimestamp,
+    messageAuthor: author,
+    emoji,
+    reactionFrom: envelope.source
   }
 }

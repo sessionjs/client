@@ -7,13 +7,15 @@ import type { Swarm } from '@session.js/types/swarm'
 import { SignalService } from '@session.js/types/signal-bindings'
 import {
   mapDataMessage,
+  mapReactionMessage,
   mapUnsendMessage,
   mapReceiptMessage,
   mapTypingMessage,
   mapScreenshotTakenMessage,
   mapMediaSavedMessage,
   mapMessageRequestResponseMessage,
-  mapCallMessage
+  mapCallMessage,
+  type SyncMessage,
 } from '@/messages'
 
 export function addPoller(this: Session, poller: Poller) {
@@ -32,6 +34,7 @@ export function addPoller(this: Session, poller: Poller) {
       newMessages
         .filter(m => m.content.dataMessage)
         .filter(m => !m.content.dataMessage?.syncTarget)
+        .filter(m => !m.content.dataMessage?.reaction)
         .map(m => mapDataMessage(m))
         .forEach(m => this._emit('message', m))
 
@@ -39,7 +42,28 @@ export function addPoller(this: Session, poller: Poller) {
         .filter(m => m.content.dataMessage)
         .filter(m => m.content.dataMessage?.syncTarget)
         .map(m => mapDataMessage(m))
-        .forEach(m => this._emit('syncMessage', m))
+        .forEach(m => this._emit('syncMessage', m as unknown as SyncMessage))
+
+      const reactionMessages = newMessages
+        .filter(m => m.content.dataMessage)
+        .filter(m => !m.content.dataMessage?.syncTarget)
+        .filter(m => m.content.dataMessage?.reaction)
+
+      reactionMessages
+        .filter(m => 
+          m.content.dataMessage?.reaction?.action === 
+          SignalService.DataMessage.Reaction.Action.REACT
+        )
+        .map(m => mapReactionMessage(m))
+        .forEach(m => m && this._emit('reactionAdded', m))
+
+      reactionMessages
+        .filter(m =>
+          m.content.dataMessage?.reaction?.action ===
+          SignalService.DataMessage.Reaction.Action.REMOVE
+        )
+        .map(m => mapReactionMessage(m))
+        .forEach(m => m && this._emit('reactionRemoved', m))
 
       newMessages
         .filter(m => m.content.unsendMessage)
