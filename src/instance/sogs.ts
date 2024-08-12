@@ -48,7 +48,7 @@ export function encodeSogsMessage(this: Session, { serverPk, text, attachments }
     blindedKeyPair
   })
 
-  const blindedSessionId = '05' + to_hex(blindedKeyPair.publicKey)
+  const blindedSessionId = '15' + to_hex(blindedKeyPair.publicKey)
   
   return { data, signature, blindedSessionId }
 }
