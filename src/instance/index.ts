@@ -18,6 +18,7 @@ import type { Poller } from '@/polling'
 
 import { getMnemonic, setMnemonic } from './get-set-mnemomic'
 import { sendMessage } from './send-message'
+import { encodeSogsMessage } from './sogs'
 import { getOurSwarm, getSwarmsFor } from './swarms'
 import { addPoller } from './polling'
 import { getSnodes } from './snodes'
@@ -149,10 +150,22 @@ export class Session {
    * Sends a visible chat message to other Session ID
    * Might throw SessionFetchError if there is a connection issue
    * @param to — Session ID of the recipient
+   * @param text — Text of the message
    * @param attachments Array of instances of File bytes to send with the message
+   * @param voiceMessage — Voice message file to attach to message
+   * @param replyToMessage — Reply to specific message
    * @returns `Promise<{ messageHash: string, syncMessageHash: string }>` — hashes (identifiers) of the messages sent (visible and sync message)
    */
   public sendMessage = sendMessage.bind(this)
+
+  /**
+   * Encodes SOGS message to store on SOGS
+   * @param serverPk — Server's public key in hex format
+   * @param text — Text of the message
+   * @param attachments Array of instances of File bytes to store with the message
+   * @returns `Promise<{ data: string, signature: string }>` — message data and signature
+   */
+  public encodeSogsMessage = encodeSogsMessage.bind(this)
 
   /**
    * Propogates unsend request which Session clients use to delete messages locally. For performance reasons, choose deleteMessages for batch deletion of multiple messages
