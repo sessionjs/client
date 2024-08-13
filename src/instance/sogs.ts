@@ -9,11 +9,21 @@ import type { Keypair } from '@session.js/keypair'
 import { sign } from 'curve25519-js'
 import type { KeyPair } from 'libsodium-wrappers-sumo'
 
+export function blindSessionId(this: Session, serverPk: string): string {
+  if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
+  const blindedKeyPair = getBlindingValues(
+    hexToUint8Array(serverPk),
+    this.keypair.ed25519
+  )
+  const blindedSessionId = '15' + to_hex(blindedKeyPair.publicKey)
+  return blindedSessionId
+}
+
 export function encodeSogsMessage(this: Session, { serverPk, text, attachments }: {
   serverPk: string
   text?: string
   attachments?: File[]
-}): { data: string, signature: string, blindedSessionId: string } {
+}): { data: string, signature: string } {
   if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
   if (attachments?.some(a => !(a instanceof File))) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidAttachment, message: 'Attachments must be instances of File' })
   if (attachments?.some(a => a.size > MAX_ATTACHMENT_FILESIZE_BYTES)) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidAttachment, message: 'Attachment size exceeds the limit: ' + MAX_ATTACHMENT_FILESIZE_BYTES + ' bytes' })
@@ -47,10 +57,8 @@ export function encodeSogsMessage(this: Session, { serverPk, text, attachments }
     keypair: this.keypair,
     blindedKeyPair
   })
-
-  const blindedSessionId = '15' + to_hex(blindedKeyPair.publicKey)
   
-  return { data, signature, blindedSessionId }
+  return { data, signature }
 }
 
 export function addMessagePadding(messageBuffer: Uint8Array): Uint8Array {

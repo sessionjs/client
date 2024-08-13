@@ -18,7 +18,7 @@ import type { Poller } from '@/polling'
 
 import { getMnemonic, setMnemonic } from './get-set-mnemomic'
 import { sendMessage } from './send-message'
-import { encodeSogsMessage } from './sogs'
+import { blindSessionId, encodeSogsMessage } from './sogs'
 import { getOurSwarm, getSwarmsFor } from './swarms'
 import { addPoller } from './polling'
 import { getSnodes } from './snodes'
@@ -159,11 +159,16 @@ export class Session {
   public sendMessage = sendMessage.bind(this)
 
   /**
+   * Convert unblinded (prefix 05) Session ID to blinded Session ID (prefix 15)
+   * @param serverPk — Server's public key in hex format
+   * @returns `Promise<{ data: string, signature: string }>` — message data and signature
+   */
+  public blindSessionId = blindSessionId.bind(this)
+
+  /**
    * Encodes SOGS message to store on SOGS
    * @param serverPk — Server's public key in hex format
-   * @param text — Text of the message
-   * @param attachments Array of instances of File bytes to store with the message
-   * @returns `Promise<{ data: string, signature: string }>` — message data and signature
+   * @returns `Promise<string>` — blinded Session ID
    */
   public encodeSogsMessage = encodeSogsMessage.bind(this)
 
