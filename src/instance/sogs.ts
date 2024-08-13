@@ -3,7 +3,7 @@ import sodium, { to_hex } from 'libsodium-wrappers-sumo'
 import { v4 as uuid } from 'uuid'
 import { hexToUint8Array, Uint8ArrayToBase64 } from '@/utils'
 import { VisibleMessage, type AttachmentPointerWithUrl } from '@/messages/schema/visible-message'
-import { SessionRuntimeError, SessionRuntimeErrorCode, SessionValidationError, SessionValidationErrorCode } from '@session.js/errors'
+import { SessionRuntimeError, SessionRuntimeErrorCode } from '@session.js/errors'
 import type { Keypair } from '@session.js/keypair'
 import { sign } from 'curve25519-js'
 import type { KeyPair } from 'libsodium-wrappers-sumo'
@@ -24,7 +24,6 @@ export function encodeSogsMessage(this: Session, { serverPk, text, attachments }
   attachments?: AttachmentPointerWithUrl[]
 }): { data: string, signature: string } {
   if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
-  if (attachments?.some(a => !(a instanceof File))) throw new SessionValidationError({ code: SessionValidationErrorCode.InvalidAttachment, message: 'Attachments must be instances of File' })
 
   const timestamp = this.getNowWithNetworkOffset()
   const msg = new VisibleMessage({
@@ -41,7 +40,6 @@ export function encodeSogsMessage(this: Session, { serverPk, text, attachments }
 
   const paddedBody = addMessagePadding(msg.plainTextBuffer())
   const data = Uint8ArrayToBase64(paddedBody)
-
 
   const blindedKeyPair = getBlindingValues(
     hexToUint8Array(serverPk),
