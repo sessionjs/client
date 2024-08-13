@@ -168,6 +168,8 @@ export class Session {
   /**
    * Encodes SOGS message to store on SOGS
    * @param serverPk — Server's public key in hex format
+   * @param text — Text of the message
+   * @param attachments — Array of AttachmentPointerWithUrl of attachments uploaded to SOGS
    * @returns `Promise<string>` — blinded Session ID
    */
   public encodeSogsMessage = encodeSogsMessage.bind(this)
