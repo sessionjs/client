@@ -33,6 +33,7 @@ export type MessageAttachment = {
 export type Message = (PrivateMessage | ClosedGroupMessage) & {
   id: string
   from: string
+  author: Profile
   text?: string
   attachments: MessageAttachment[]
   replyToMessage?: {
@@ -75,6 +76,11 @@ export function mapDataMessage({ hash, envelope, content }: Content): Message {
     timestamp = timestamp.toNumber()
   }
   const attachments = content.dataMessage?.attachments ? parseAttachments(content.dataMessage.attachments) : []  
+  const author = deserializeProfile({
+    lokiProfile: content.messageRequestResponse!.profile ?? undefined,
+    profileKey: content.messageRequestResponse!.profileKey ?? undefined
+  })
+  author.displayName ||= getPlaceholderDisplayName(envelope.source)
   return {
     id: hash,
     ...(isGroup ? {
@@ -84,6 +90,7 @@ export function mapDataMessage({ hash, envelope, content }: Content): Message {
       type: 'private'
     }),
     from,
+    author,
     ...(content.dataMessage!.syncTarget && {
       to: content.dataMessage!.syncTarget
     }),
