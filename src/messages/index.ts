@@ -77,8 +77,8 @@ export function mapDataMessage({ hash, envelope, content }: Content): Message {
   }
   const attachments = content.dataMessage?.attachments ? parseAttachments(content.dataMessage.attachments) : []  
   const author = deserializeProfile({
-    lokiProfile: content.messageRequestResponse!.profile ?? undefined,
-    profileKey: content.messageRequestResponse!.profileKey ?? undefined
+    lokiProfile: content.dataMessage!.profile ?? undefined,
+    profileKey: content.dataMessage!.profileKey ?? undefined
   })
   author.displayName ||= getPlaceholderDisplayName(envelope.source)
   return {
