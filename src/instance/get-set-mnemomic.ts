@@ -6,6 +6,7 @@ import {
 } from '@session.js/errors'
 import { getKeypairFromSeed } from '@session.js/keypair'
 import { decode } from '@session.js/mnemonic'
+import { StorageKeys } from '@session.js/types/storage'
 
 export function setMnemonic(this: Session, mnemonic: string, displayName ?: string) {
   if (this.isAuthorized) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.InstanceAlreadyAuthorized, message: 'Mnemonic can\'t be set after it was already set' })
@@ -18,6 +19,21 @@ export function setMnemonic(this: Session, mnemonic: string, displayName ?: stri
   this.mnemonic = mnemonic
   if (displayName !== undefined) {
     this.setDisplayName(displayName)
+  } else {
+    const displayNameStorage =this.storage.get(StorageKeys.DisplayName)
+    if (typeof displayNameStorage === 'string') {
+      this.displayName = displayNameStorage
+    } else if (displayNameStorage) {
+      displayNameStorage.then(dn => { 
+        if(dn) {
+          this.displayName = dn
+        }
+      })
+    }
+  }
+  const avatarStorageRequest = this.storage.get(StorageKeys.Avatar)
+  if (avatarStorageRequest !== null) {
+    loadAvatar.call(this, avatarStorageRequest)
   }
   this.isAuthorized = true
   this.pollers.forEach(poller => poller.startPolling())
@@ -25,4 +41,16 @@ export function setMnemonic(this: Session, mnemonic: string, displayName ?: stri
 
 export function getMnemonic(this: Session): string | undefined {
   return this.mnemonic
+}
+
+type AvatarStorage = { key: number[], url: string }
+async function loadAvatar(this: Session, avatarStorageRequest: string | Promise<string | null>) {
+  const avatarStorageSerialized = typeof avatarStorageRequest === 'string' 
+    ? avatarStorageRequest 
+    : await avatarStorageRequest
+  if (typeof avatarStorageSerialized === 'string') {
+    const { key, url } = JSON.parse(avatarStorageSerialized) as AvatarStorage
+    const profileKey = new Uint8Array(key)
+    this.avatar = { key: profileKey, url }
+  }
 }
