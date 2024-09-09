@@ -43,7 +43,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@session.js/bun-network": "^1.0.5",
+    "@session.js/bun-network": "^1.0.10",
     "@session.js/consts": "^1.0.3",
     "@session.js/errors": "^1.0.10",
     "@session.js/keypair": "^1.0.2",
