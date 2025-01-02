@@ -250,7 +250,7 @@ export async function sendSogsRequest(this: Session, {
     body: {
       host,
       endpoint,
-      method: 'POST',
+      method,
       body: bodyProcessed,
       headers: {
         ...(contentType !== null && { 'Content-Type': contentType }),
