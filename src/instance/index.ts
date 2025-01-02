@@ -170,6 +170,7 @@ export class Session {
    * @param serverPk — Server's public key in hex format
    * @param text — Text of the message
    * @param attachments — Array of AttachmentPointerWithUrl of attachments uploaded to SOGS
+   * @param replyToMessage — Array of AttachmentPointerWithUrl of attachments uploaded to SOGS
    * @param blind — Whether to encrypt this message to be sent as blinded user or not
    * @returns `Promise<{ data: string, signature: string }>` — message data and signature
    */

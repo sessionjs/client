@@ -1,8 +1,7 @@
 import type { Session } from '@/instance'
 import sodium, { to_hex } from 'libsodium-wrappers-sumo'
-import { v4 as uuid } from 'uuid'
 import { hexToUint8Array, Uint8ArrayToBase64 } from '@/utils'
-import { VisibleMessage, type AttachmentPointerWithUrl } from '@/messages/schema/visible-message'
+import { VisibleMessage } from '@/messages/schema/visible-message'
 import { SessionRuntimeError, SessionRuntimeErrorCode } from '@session.js/errors'
 import type { Keypair } from '@session.js/keypair'
 import { sign } from 'curve25519-js'
@@ -20,28 +19,14 @@ export function blindSessionId(this: Session, serverPk: string): string {
   return blindedSessionId
 }
 
-export function encodeSogsMessage(this: Session, { serverPk, text, attachments, blind }: {
+export function encodeSogsMessage(this: Session, { serverPk, message, blind }: {
   serverPk: string
-  text?: string
-  attachments?: AttachmentPointerWithUrl[]
+  message: VisibleMessage
   blind: boolean
 }): { data: string, signature: string } {
   if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
 
-  const timestamp = this.getNowWithNetworkOffset()
-  const msg = new VisibleMessage({
-    body: text,
-    profile: this._getProfile(),
-    timestamp: timestamp,
-    expirationType: null,
-    expireTimer: null,
-    identifier: uuid(),
-    attachments: attachments,
-    preview: [],
-    quote: undefined
-  })
-
-  const paddedBody = addMessagePadding(msg.plainTextBuffer())
+  const paddedBody = addMessagePadding(message.plainTextBuffer())
   const data = Uint8ArrayToBase64(paddedBody)
 
   let signature: string
