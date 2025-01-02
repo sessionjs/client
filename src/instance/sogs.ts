@@ -7,6 +7,8 @@ import { SessionRuntimeError, SessionRuntimeErrorCode } from '@session.js/errors
 import type { Keypair } from '@session.js/keypair'
 import { sign } from 'curve25519-js'
 import type { KeyPair } from 'libsodium-wrappers-sumo'
+import { RequestType, type RequestSogs } from '@session.js/types/network/request'
+import type { ResponseSogsRequest } from '@session.js/types/network/response'
 
 export function blindSessionId(this: Session, serverPk: string): string {
   if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
@@ -18,10 +20,11 @@ export function blindSessionId(this: Session, serverPk: string): string {
   return blindedSessionId
 }
 
-export function encodeSogsMessage(this: Session, { serverPk, text, attachments }: {
+export function encodeSogsMessage(this: Session, { serverPk, text, attachments, blind }: {
   serverPk: string
   text?: string
   attachments?: AttachmentPointerWithUrl[]
+  blind: boolean
 }): { data: string, signature: string } {
   if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
 
@@ -41,16 +44,23 @@ export function encodeSogsMessage(this: Session, { serverPk, text, attachments }
   const paddedBody = addMessagePadding(msg.plainTextBuffer())
   const data = Uint8ArrayToBase64(paddedBody)
 
-  const blindedKeyPair = getBlindingValues(
-    hexToUint8Array(serverPk),
-    this.keypair.ed25519
-  )
-
-  const signature = getSignatureWithBlinding({
-    data: paddedBody,
-    keypair: this.keypair,
-    blindedKeyPair
-  })
+  let signature: string
+  if (blind) {
+    const blindedKeyPair = getBlindingValues(
+      hexToUint8Array(serverPk),
+      this.keypair.ed25519
+    )
+    signature = getSignatureWithBlinding({
+      data: paddedBody,
+      keypair: this.keypair,
+      blindedKeyPair
+    })
+  } else {
+    signature = getSignatureWithoutBlinding({
+      data: paddedBody,
+      keypair: this.keypair
+    })
+  }
   
   return { data, signature }
 }
@@ -74,13 +84,12 @@ function getPaddedMessageLength(originalLength: number): number {
   return messagePartCount * 160
 }
 
-export async function getSignature(data: Uint8Array, keypair: Keypair): Promise<string> {
+function getSignatureWithoutBlinding({ data, keypair }: {
+  data: Uint8Array, 
+  keypair: Keypair
+}) {
   const signature = sign(keypair.x25519.privateKey, data, null)
-  if (!signature || signature.length === 0) {
-    throw new Error('Couldn\'t sign message')
-  }
-  const base64Sig = Uint8ArrayToBase64(signature)
-  return base64Sig
+  return Uint8ArrayToBase64(signature)
 }
 
 function getSignatureWithBlinding({ data, keypair, blindedKeyPair }: {
@@ -92,13 +101,7 @@ function getSignatureWithBlinding({ data, keypair, blindedKeyPair }: {
   },
   keypair: Keypair
 }): string {
-  const signature = getSogsSignature({
-    blinded: true,
-    ka: blindedKeyPair.secretKey,
-    kA: blindedKeyPair.publicKey,
-    toSign: data,
-    signingKeys: keypair.ed25519,
-  })
+  const signature = blindedED25519Signature(data, keypair.ed25519, blindedKeyPair.secretKey, blindedKeyPair.publicKey)
   if (!signature || signature.length === 0) {
     throw new Error('Couldn\'t sign message')
   }
@@ -171,21 +174,86 @@ export const concatUInt8Array = (...args: Array<Uint8Array>): Uint8Array => {
   return concatted
 }
 
-function getSogsSignature({
-  blinded,
-  ka,
-  kA,
-  toSign,
-  signingKeys,
-}: {
-  blinded: boolean
-  ka?: Uint8Array
-  kA?: Uint8Array
-  toSign: Uint8Array
-  signingKeys: KeyPair
+export async function signSogsRequest(this: Session, { blind, serverPk, timestamp, endpoint, nonce, method, body }: {
+  blind: boolean
+  serverPk: string
+  timestamp: number
+  endpoint: string
+  nonce: Uint8Array
+  method: string
+  body: string | Uint8Array
 }) {
-  if (blinded && ka && kA) {
-    return blindedED25519Signature(toSign, signingKeys, ka, kA)
+  if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
+  const bodyHashed = sodium.crypto_generichash(64, body)
+  const pk = hexToUint8Array(serverPk)
+  const toSign = concatUInt8Array(
+    pk,
+    nonce,
+    new Uint8Array(Buffer.from(timestamp.toString(), 'utf-8')),
+    new Uint8Array(Buffer.from(method.toString(), 'utf-8')),
+    new Uint8Array(Buffer.from(endpoint.toString(), 'utf-8')),
+    bodyHashed
+  )
+  if (blind) {
+    const blindingValues = getBlindingValues(pk, this.keypair.ed25519)
+    const ka = blindingValues.secretKey
+    const kA = blindingValues.publicKey
+    const signature = await blindedED25519Signature(toSign, this.keypair.ed25519, ka, kA)
+    return signature
+  } else {
+    return sodium.crypto_sign_detached(toSign, this.keypair.ed25519.privateKey)
   }
-  return sodium.crypto_sign_detached(toSign, signingKeys.privateKey)
+}
+
+export async function sendSogsRequest(this: Session, {
+  host,
+  serverPk,
+  endpoint,
+  body,
+  blind,
+}: {
+  host: string
+  serverPk: string
+  endpoint: string
+  body: string | Uint8Array
+  blind: boolean
+}) {
+  if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
+
+  const nonce = sodium.randombytes_buf(16)
+  const timestamp = Math.floor(Date.now() / 1000)
+  const reqSignature = await this.signSogsRequest({
+    blind,
+    serverPk,
+    timestamp,
+    endpoint,
+    nonce,
+    method: 'POST',
+    body
+  })
+  let pubkey: string
+  if(blind) {
+    pubkey = this.getSessionID()
+  } else {
+    pubkey = '00' + Buffer.from(this.keypair.ed25519.publicKey).toString('hex')
+  }
+
+  const bodyProcessed = body instanceof Uint8Array ? body.buffer as ArrayBuffer : body
+
+  return await this._request<ResponseSogsRequest, RequestSogs>({
+    type: RequestType.SOGSRequest,
+    body: {
+      host,
+      endpoint,
+      method: 'POST',
+      body: bodyProcessed,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-SOGS-Pubkey': pubkey,
+        'X-SOGS-Timestamp': String(timestamp),
+        'X-SOGS-Nonce': Buffer.from(nonce).toString('base64'),
+        'X-SOGS-Signature': Buffer.from(reqSignature).toString('base64'),
+      }
+    }
+  })
 }

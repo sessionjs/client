@@ -18,7 +18,7 @@ import type { Poller } from '@/polling'
 
 import { getMnemonic, setMnemonic } from './get-set-mnemomic'
 import { sendMessage } from './send-message'
-import { blindSessionId, encodeSogsMessage } from './sogs'
+import { blindSessionId, encodeSogsMessage, signSogsRequest, sendSogsRequest } from './sogs'
 import { getOurSwarm, getSwarmsFor } from './swarms'
 import { addPoller } from './polling'
 import { getSnodes } from './snodes'
@@ -161,7 +161,7 @@ export class Session {
   /**
    * Convert unblinded (prefix 05) Session ID to blinded Session ID (prefix 15)
    * @param serverPk — Server's public key in hex format
-   * @returns `Promise<{ data: string, signature: string }>` — message data and signature
+   * @returns `Promise<string>` — blinded Session ID
    */
   public blindSessionId = blindSessionId.bind(this)
 
@@ -170,9 +170,34 @@ export class Session {
    * @param serverPk — Server's public key in hex format
    * @param text — Text of the message
    * @param attachments — Array of AttachmentPointerWithUrl of attachments uploaded to SOGS
-   * @returns `Promise<string>` — blinded Session ID
+   * @param blind — Whether to encrypt this message to be sent as blinded user or not
+   * @returns `Promise<{ data: string, signature: string }>` — message data and signature
    */
   public encodeSogsMessage = encodeSogsMessage.bind(this)
+
+  /**
+   * Sign request to SOGS (`sendSogsRequest` is recommended instead)
+   * @param blind — Whether to sign this request to be sent as blinded user or not
+   * @param serverPk — Server's public key in hex format
+   * @param timestamp — Timestamp (in unix seconds) that you will pass in `X-SOGS-Timestamp` header
+   * @param endpoint — Endpoint of the request with leading slash, e.g. `/room/mytestroom`
+   * @param nonce — Random 16 bytes nonce that you will pass in `X-SOGS-Nonce` header
+   * @param method — HTTP method of the request e.g. `POST`
+   * @param body — Stringified or raw body of request
+   * @returns `Promise<{ data: string, signature: string }>` — message data and signature
+   */
+  public signSogsRequest = signSogsRequest.bind(this)
+  
+  /**
+   * Encrypt, sign and send request to SOGS
+   * @param host — SOGS host (e.g. https://sogs.hloth.dev/)
+   * @param serverPk — Server's public key in hex format
+   * @param endpoint — Endpoint as string, e.g. `/room/bunsogs`
+   * @param body — Stringified or raw body of request
+   * @param blind — Whether to send this request as blinded user (recommended) or not. Defaults to true
+   * @returns `Promise<any>` — response from SOGS
+   */
+  public sendSogsRequest = sendSogsRequest.bind(this)
 
   /**
    * Propogates unsend request which Session clients use to delete messages locally. For performance reasons, choose deleteMessages for batch deletion of multiple messages
