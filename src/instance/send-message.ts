@@ -108,7 +108,7 @@ export async function sendMessage(this: Session, { to, text, attachments, voiceM
   const timestamp = this.getNowWithNetworkOffset()
   const msg = new VisibleMessage({
     body: text,
-    profile: this._getProfile(),
+    profile: this.getMyProfile(),
     timestamp: timestamp,
     expirationType: 'unknown',
     expireTimer: 0,

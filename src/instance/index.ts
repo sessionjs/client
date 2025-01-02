@@ -288,7 +288,11 @@ export class Session {
     return await this.network.onRequest(type, body) as Response
   }
 
-  protected _getProfile() {
+  /**
+   * Advanced use. Returns profile object with display name and avatar of this instance
+   * @returns Profile (for messages classes)
+   */
+  getMyProfile() {
     return {
       displayName: this.displayName ?? getPlaceholderDisplayName(this.getSessionID()),
       avatar: this.getAvatar(),

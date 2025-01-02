@@ -46,7 +46,7 @@ async function sendReactionMessage(this: Session, { messageTimestamp, action, me
       author: messageAuthor,
       emoji,
     },
-    profile: this._getProfile(),
+    profile: this.getMyProfile(),
     expirationType: null,
     expireTimer: null,
   }

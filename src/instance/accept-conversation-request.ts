@@ -9,7 +9,7 @@ export async function acceptConversationRequest(this: Session, { from }: {
 }) {
   const messageRequestResponse = new MessageRequestResponse({
     timestamp: Date.now(),
-    profile: this._getProfile()
+    profile: this.getMyProfile()
   })
   const timestamp = this.getNowWithNetworkOffset()
   const rawMessage = toRawMessage(from, messageRequestResponse, SnodeNamespaces.UserMessages)
