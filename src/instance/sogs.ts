@@ -181,19 +181,21 @@ export async function signSogsRequest(this: Session, { blind, serverPk, timestam
   endpoint: string
   nonce: Uint8Array
   method: string
-  body: string | Uint8Array
+  body?: string | Uint8Array
 }) {
   if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
-  const bodyHashed = sodium.crypto_generichash(64, body)
   const pk = hexToUint8Array(serverPk)
-  const toSign = concatUInt8Array(
+  let toSign = concatUInt8Array(
     pk,
     nonce,
     new Uint8Array(Buffer.from(timestamp.toString(), 'utf-8')),
     new Uint8Array(Buffer.from(method.toString(), 'utf-8')),
-    new Uint8Array(Buffer.from(endpoint.toString(), 'utf-8')),
-    bodyHashed
+    new Uint8Array(Buffer.from(endpoint.toString(), 'utf-8'))
   )
+  if(body) {
+    const bodyHashed = sodium.crypto_generichash(64, body)
+    toSign = concatUInt8Array(toSign, bodyHashed)
+  }
   if (blind) {
     const blindingValues = getBlindingValues(pk, this.keypair.ed25519)
     const ka = blindingValues.secretKey
@@ -209,13 +211,15 @@ export async function sendSogsRequest(this: Session, {
   host,
   serverPk,
   endpoint,
+  method,
   body,
   blind,
 }: {
   host: string
   serverPk: string
-  endpoint: string
-  body: string | Uint8Array
+  endpoint: string,
+  method: string,
+  body?: string | Uint8Array
   blind: boolean
 }) {
   if (!this.sessionID || !this.keypair) throw new SessionRuntimeError({ code: SessionRuntimeErrorCode.EmptyUser, message: 'Instance is not initialized; use setMnemonic first' })
@@ -228,7 +232,7 @@ export async function sendSogsRequest(this: Session, {
     timestamp,
     endpoint,
     nonce,
-    method: 'POST',
+    method,
     body
   })
   let pubkey: string
@@ -238,7 +242,8 @@ export async function sendSogsRequest(this: Session, {
     pubkey = '00' + Buffer.from(this.keypair.ed25519.publicKey).toString('hex')
   }
 
-  const bodyProcessed = body instanceof Uint8Array ? body.buffer as ArrayBuffer : body
+  const contentType = body !== undefined ? (body instanceof Uint8Array ? 'application/octet-stream' : 'application/json') : null
+  const bodyProcessed = body && body !== undefined ? body instanceof Uint8Array ? body.buffer as ArrayBuffer : body : null
 
   return await this._request<ResponseSogsRequest, RequestSogs>({
     type: RequestType.SOGSRequest,
@@ -248,7 +253,7 @@ export async function sendSogsRequest(this: Session, {
       method: 'POST',
       body: bodyProcessed,
       headers: {
-        'Content-Type': 'application/json',
+        ...(contentType !== null && { 'Content-Type': contentType }),
         'X-SOGS-Pubkey': pubkey,
         'X-SOGS-Timestamp': String(timestamp),
         'X-SOGS-Nonce': Buffer.from(nonce).toString('base64'),

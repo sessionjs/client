@@ -183,7 +183,7 @@ export class Session {
    * @param endpoint — Endpoint of the request with leading slash, e.g. `/room/mytestroom`
    * @param nonce — Random 16 bytes nonce that you will pass in `X-SOGS-Nonce` header
    * @param method — HTTP method of the request e.g. `POST`
-   * @param body — Stringified or raw body of request
+   * @param body — Stringified or raw body of request (optional)
    * @returns `Promise<{ data: string, signature: string }>` — message data and signature
    */
   public signSogsRequest = signSogsRequest.bind(this)
@@ -193,7 +193,8 @@ export class Session {
    * @param host — SOGS host (e.g. https://sogs.hloth.dev/)
    * @param serverPk — Server's public key in hex format
    * @param endpoint — Endpoint as string, e.g. `/room/bunsogs`
-   * @param body — Stringified or raw body of request
+   * @param method — HTTP method of the request e.g. `POST`
+   * @param body — Stringified or raw body of request (optional)
    * @param blind — Whether to send this request as blinded user (recommended) or not. Defaults to true
    * @returns `Promise<any>` — response from SOGS
    */

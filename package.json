@@ -1,6 +1,6 @@
 {
   "name": "@session.js/client",
-  "version": "0.0.48",
+  "version": "0.0.50",
   "type": "module",
   "homepage": "https://github.com/sessionjs/client",
   "repository": {
@@ -48,7 +48,7 @@
     "@session.js/errors": "^1.0.10",
     "@session.js/keypair": "^1.0.2",
     "@session.js/mnemonic": "^1.0.4",
-    "@session.js/types": "^1.0.10",
+    "@session.js/types": "^1.0.11",
     "bytebuffer": "^5.0.1",
     "curve25519-js": "^0.0.4",
     "libsodium-wrappers-sumo": "^0.7.13",
