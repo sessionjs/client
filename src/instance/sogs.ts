@@ -237,7 +237,7 @@ export async function sendSogsRequest(this: Session, {
   })
   let pubkey: string
   if(blind) {
-    pubkey = this.getSessionID()
+    pubkey = this.blindSessionId(serverPk)
   } else {
     pubkey = '00' + Buffer.from(this.keypair.ed25519.publicKey).toString('hex')
   }
