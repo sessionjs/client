@@ -7,6 +7,9 @@ Session.js allows you to create:
 - Custom Session clients (web-based and native with JS backend)
 - Automation tools for Session
 
+> [!IMPORTANT]
+> I'm looking for a job! Interested in hiring me? Visit [cv.hloth.dev](https://cv.hloth.dev) to review my resume & CV.
+
 ## Features
 
 - On-demand polling — you decide when to get new messages and whether instance should poll them (and poll settings like frequency) or work just for sending
